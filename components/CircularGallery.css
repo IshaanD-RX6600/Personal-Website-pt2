@@ -1,0 +1,60 @@
+.circular-gallery {
+  height: 250px; /* Reduced from 400px */
+  width: 100%;
+  overflow: hidden;
+  cursor: grab;
+  position: relative;
+}
+
+.circular-gallery:active {
+  cursor: grabbing;
+}
+
+.circular-gallery canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+/* For better mobile experience */
+@media (max-width: 768px) {
+  .circular-gallery {
+    height: 200px; /* Reduced from 300px */
+  }
+}
+
+/* Ensure canvas is touch-responsive */
+.circular-gallery canvas {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Loading state */
+.circular-gallery::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  z-index: 1;
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Hide loading spinner once canvas is loaded */
+.circular-gallery canvas + * {
+  display: none;
+}

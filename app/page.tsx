@@ -2,6 +2,7 @@
 
 import Lightning from "@/components/Lightning";
 import SimpleDock from "@/components/SimpleDock";
+import GlitchText from "@/components/GlitchText";
 import { VscHome, VscArchive, VscAccount, VscSettingsGear, VscCode } from "react-icons/vsc";
 
 export default function HomePage() {
@@ -19,7 +20,7 @@ export default function HomePage() {
   const dockItems = [
     { icon: <VscHome size={18} />, label: 'Home', onClick: () => handleNavigation('/') },
     { icon: <VscCode size={18} />, label: 'Projects', onClick: () => handleNavigation('/projects') },
-    { icon: <VscAccount size={18} />, label: 'About', onClick: () => alert('About!') },
+    { icon: <VscAccount size={18} />, label: 'About', onClick: () => handleNavigation('/about') },
     { icon: <VscArchive size={18} />, label: 'Resume', onClick: () => alert('Resume!') },
     { icon: <VscSettingsGear size={18} />, label: 'Contact', onClick: () => alert('Contact!') },
   ];
@@ -39,9 +40,14 @@ export default function HomePage() {
       
       {/* Content */}
       <div className="relative z-10 flex items-center justify-center min-h-screen">
-        <h1 className="text-6xl md:text-8xl font-bold text-white text-center">
+        <GlitchText
+          speed={1}
+          enableShadows={true}
+          enableOnHover={true}
+          className="text-6xl md:text-8xl font-bold text-white text-center"
+        >
           Ishaan Dhiman
-        </h1>
+        </GlitchText>
       </div>
 
       {/* Dock Navigation */}
