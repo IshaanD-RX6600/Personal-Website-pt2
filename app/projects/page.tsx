@@ -25,11 +25,17 @@ export default function ProjectsPage() {
     { icon: <VscSettingsGear size={18} />, label: 'Contact', onClick: () => alert('Contact!') },
   ];
 
-  // Prevent scrolling
+  // Allow scrolling for projects page
   useEffect(() => {
-    document.body.classList.add('no-scroll');
+    // Force remove no-scroll class and enable scrolling
+    document.body.classList.remove('no-scroll');
+    document.body.style.overflow = 'auto';
+    document.body.style.height = 'auto';
+    document.documentElement.style.overflow = 'auto';
+    document.documentElement.style.height = 'auto';
+    
     return () => {
-      document.body.classList.remove('no-scroll');
+      // Clean up on unmount - don't restore no-scroll
     };
   }, []);
 
@@ -54,11 +60,32 @@ export default function ProjectsPage() {
       liveUrl: "https://formfluxwork.vercel.app/",
       githubUrl: "https://github.com/DhairyaS450/formflux",
       image: "/formflux-new-screenshot.png"
+    },
+    {
+      title: "CHCI Coding Club",
+      description: "Club website for the CHCI Coding Club, featuring club information, events, and member resources.",
+      liveUrl: "https://chci-coding-club.vercel.app/",
+      githubUrl: "https://github.com/IshaanD-RX6600/Coding-Club-Website",
+      image: "/CHCI-CoodingClubphoto.png"
+    },
+    {
+      title: "Move Master",
+      description: "Movement tracking app that monitors and analyzes user movement patterns for fitness and health insights.",
+      liveUrl: "https://www.youtube.com/watch?v=S022Pv9t8z4",
+      githubUrl: "https://github.com/IshaanD-RX6600/Move-Master",
+      image: "/Move-Master.png"
+    },
+    {
+      title: "Pantry Tracker",
+      description: "Hackathon project showcasing innovative solutions and collaborative development during the HawkHacks event.",
+      liveUrl: null,
+      githubUrl: "https://github.com/RohanZ2/HawkHacks",
+      image: "coming-soon"
     }
   ];
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative">
       {/* Purple Lightning Background */}
       <div className="absolute inset-0">
         <Lightning
@@ -71,7 +98,7 @@ export default function ProjectsPage() {
       </div>
       
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-8">
+      <div className="relative z-10 flex flex-col items-center min-h-screen p-8 pt-20 pb-32">
         <h1 className="text-5xl md:text-7xl font-bold text-white text-center mb-12">
           Projects
         </h1>
@@ -82,34 +109,40 @@ export default function ProjectsPage() {
             <div key={index} className="bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg overflow-hidden hover:bg-black/40 transition-all duration-300">
               {/* Project Image */}
               <div className="w-full h-48 bg-gray-800/50 flex items-center justify-center">
-                <img
-                  src={project.image}
-                  alt={project.title}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    const parent = target.parentElement;
-                    if (parent) {
-                      parent.innerHTML = `<div class="text-white/60 text-sm">Preview Image</div>`;
-                    }
-                  }}
-                />
+                {project.image === "coming-soon" ? (
+                  <div className="text-white/80 text-lg font-semibold">Coming Soon</div>
+                ) : (
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
+                      if (parent) {
+                        parent.innerHTML = `<div class="text-white/60 text-sm">Preview Image</div>`;
+                      }
+                    }}
+                  />
+                )}
               </div>
               {/* Project Content */}
               <div className="p-6">
                 <h3 className="text-xl font-bold text-white mb-3">{project.title}</h3>
                 <p className="text-gray-300 mb-4 text-sm">{project.description}</p>
                 <div className="flex gap-3">
-                  <a
-                    href={project.liveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-3 py-2 bg-blue-600/80 text-white rounded-md hover:bg-blue-700/80 transition-colors text-sm"
-                  >
-                    <VscLinkExternal size={14} />
-                    Website Link
-                  </a>
+                  {project.liveUrl && (
+                    <a
+                      href={project.liveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-3 py-2 bg-blue-600/80 text-white rounded-md hover:bg-blue-700/80 transition-colors text-sm"
+                    >
+                      <VscLinkExternal size={14} />
+                      {project.liveUrl.includes('youtube.com') ? 'Demo Video' : 'Website Link'}
+                    </a>
+                  )}
                   <a
                     href={project.githubUrl}
                     target="_blank"
