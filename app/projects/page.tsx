@@ -39,7 +39,7 @@ export default function ProjectsPage() {
       description: "An AI-powered task management application that helps users organize and prioritize their work efficiently.",
       liveUrl: "https://tasktide-ai.vercel.app/",
       githubUrl: "https://github.com/DhairyaS450/track-ai-web",
-      image: "/Screenshot 2025-07-28 233413.png"
+      image: "/Screenshot 2025-07-28 233435.png"
     },
     {
       title: "Personal Portfolio",
@@ -53,7 +53,7 @@ export default function ProjectsPage() {
       description: "Your personal AI fitness coach with workout tracking, progress monitoring, and personalized fitness guidance.",
       liveUrl: "https://formfluxwork.vercel.app/",
       githubUrl: "https://github.com/DhairyaS450/formflux",
-      image: "/formflux-welcome.png"
+      image: "/formflux-new-screenshot.png"
     }
   ];
 
