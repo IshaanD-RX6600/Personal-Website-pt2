@@ -1,13 +1,24 @@
 "use client";
 
 import Lightning from "@/components/Lightning";
-import Dock from "@/components/Dock";
+import SimpleDock from "@/components/SimpleDock";
 import { VscHome, VscArchive, VscAccount, VscSettingsGear, VscCode } from "react-icons/vsc";
 
 export default function HomePage() {
+  const handleNavigation = (path: string) => {
+    console.log('Navigating to:', path); // Debug log
+    try {
+      window.location.href = path;
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback navigation
+      window.location.assign(path);
+    }
+  };
+
   const dockItems = [
-    { icon: <VscHome size={18} />, label: 'Home', onClick: () => alert('Home!') },
-    { icon: <VscCode size={18} />, label: 'Projects', onClick: () => alert('Projects!') },
+    { icon: <VscHome size={18} />, label: 'Home', onClick: () => handleNavigation('/') },
+    { icon: <VscCode size={18} />, label: 'Projects', onClick: () => handleNavigation('/projects') },
     { icon: <VscAccount size={18} />, label: 'About', onClick: () => alert('About!') },
     { icon: <VscArchive size={18} />, label: 'Resume', onClick: () => alert('Resume!') },
     { icon: <VscSettingsGear size={18} />, label: 'Contact', onClick: () => alert('Contact!') },
@@ -34,14 +45,7 @@ export default function HomePage() {
       </div>
 
       {/* Dock Navigation */}
-      <div className="relative z-20">
-        <Dock 
-          items={dockItems}
-          panelHeight={68}
-          baseItemSize={50}
-          magnification={70}
-        />
-      </div>
+      <SimpleDock items={dockItems} />
     </div>
   )
 }

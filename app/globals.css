@@ -71,3 +71,9 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* Prevent scrolling on specific pages */
+.no-scroll {
+  overflow: hidden;
+  height: 100vh;
+}
