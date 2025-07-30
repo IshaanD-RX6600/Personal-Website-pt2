@@ -4,6 +4,8 @@ import Lightning from "@/components/Lightning";
 import SimpleDock from "@/components/SimpleDock";
 import TiltedCard from "@/components/TiltedCard";
 import TextType from "@/components/TextType";
+import ScrollStack, { ScrollStackItem } from "@/components/ScrollStack";
+import Roadmap, { RoadmapItem } from "@/components/Roadmap";
 import { VscHome, VscArchive, VscAccount, VscSettingsGear, VscCode } from "react-icons/vsc";
 import { motion } from "framer-motion";
 
@@ -504,6 +506,144 @@ export default function AboutPage() {
               />
             </motion.div>
           </motion.div>
+        </motion.div>
+
+        {/* Activities & Achievements Section with ScrollStack */}
+        <motion.div 
+          className="mt-8 w-full"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          <motion.div 
+            className="mb-8 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            viewport={{ once: true, amount: 0.5 }}
+          >
+            <TextType 
+              text="Activities & Achievements" 
+              className="text-xl md:text-2xl font-bold text-white"
+            />
+          </motion.div>
+          
+          <div className="max-w-4xl mx-auto">
+            <ScrollStack
+              className="activities-scroll-stack"
+              itemDistance={50}
+              itemScale={0.05}
+              itemStackDistance={25}
+              stackPosition="15%"
+              scaleEndPosition="5%"
+              baseScale={0.92}
+            >
+              <ScrollStackItem>
+                <div className="emoji">🔬</div>
+                <h3>STEM Club Member</h3>
+                <p>Exploring science, technology, engineering, and mathematics through hands-on projects and collaborative learning experiences.</p>
+              </ScrollStackItem>
+
+              <ScrollStackItem>
+                <div className="emoji">💻</div>
+                <h3>Coding Club Member - Website Manager</h3>
+                <p>Leading web development initiatives and managing the club's digital presence while mentoring fellow students in programming.</p>
+              </ScrollStackItem>
+
+              <ScrollStackItem>
+                <div className="emoji">🌍</div>
+                <h3>GEOGUESSER Club Member</h3>
+                <p>Geography enthusiast and world explorer, developing keen observation skills and cultural awareness through geographical challenges.</p>
+              </ScrollStackItem>
+
+              <ScrollStackItem>
+                <div className="emoji">🤝</div>
+                <h3>South Asian Student Alliance</h3>
+                <p>Building community and cultural connections, fostering inclusivity and celebrating diverse backgrounds within our school community.</p>
+              </ScrollStackItem>
+
+              <ScrollStackItem>
+                <div className="emoji">🛠️</div>
+                <h3>Student Tech Support</h3>
+                <p>Helping fellow students with technology issues, providing technical assistance and troubleshooting support across campus.</p>
+              </ScrollStackItem>
+
+              <ScrollStackItem>
+                <div className="emoji">🧮</div>
+                <h3>UCMAS Graduate</h3>
+                <p>Universal Concept of Mental Arithmetic System graduate, demonstrating advanced mental calculation abilities and mathematical proficiency.</p>
+              </ScrollStackItem>
+
+              <ScrollStackItem>
+                <div className="emoji">🥋</div>
+                <h3>Karate Orange Belt</h3>
+                <p>Martial arts practitioner and discipline enthusiast, embodying the values of respect, perseverance, and continuous self-improvement.</p>
+              </ScrollStackItem>
+
+              <ScrollStackItem>
+                <div className="emoji">🏆</div>
+                <h3>Top 3 in 2024 Junior CCC</h3>
+                <p>Achieved top three placement in the 2024 Canadian Computing Contest (Junior), demonstrating exceptional problem-solving and algorithmic thinking skills.</p>
+              </ScrollStackItem>
+
+              <ScrollStackItem>
+                <div className="emoji">🥇</div>
+                <h3>Top 3 in 2025 Junior CCC</h3>
+                <p>Secured top three placement in the 2025 Canadian Computing Contest (Junior), showcasing consistent excellence in competitive programming and computational thinking.</p>
+              </ScrollStackItem>
+            </ScrollStack>
+          </div>
+        </motion.div>
+
+        {/* Aquatic Certifications Section */}
+        <motion.div 
+          className="mt-16 w-full"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          <motion.div 
+            className="mb-8 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            viewport={{ once: true, amount: 0.5 }}
+          >
+            <TextType 
+              text="Aquatic Certifications" 
+              className="text-xl md:text-2xl font-bold text-white"
+            />
+          </motion.div>
+          
+          <div className="max-w-4xl mx-auto">
+            <Roadmap className="aquatic-roadmap">
+              <RoadmapItem index={0}>
+                <div className="emoji">🏅</div>
+                <h3>Bronze Medallion (15 hr.)</h3>
+                <p>Challenges the candidate both mentally and physically. Judgment, knowledge, skill, and fitness – the four components of water rescue – form the basis of Bronze Medallion training. Acquired the assessment and problem-solving skills needed to make good decisions in, on, and around the water. Serves as a prerequisite for assistant lifeguard training in Bronze Cross.</p>
+              </RoadmapItem>
+
+              <RoadmapItem index={1}>
+                <div className="emoji">🥉</div>
+                <h3>Bronze Cross (20 hr.)</h3>
+                <p>Begins the transition from lifesaving to lifeguarding and prepares candidates for responsibilities as assistant lifeguards. Strengthened and expanded lifesaving skills while beginning to apply the principles and techniques of active surveillance in aquatic facilities. Emphasizes the importance of teamwork and communication in preventing and responding to aquatic emergencies.</p>
+              </RoadmapItem>
+
+              <RoadmapItem index={2}>
+                <div className="emoji">🛟</div>
+                <h3>National Lifeguard (40 hr.)</h3>
+                <p>National Lifeguard is the standard for professional lifeguards in Canada. Completed 40 hours of intensive training in advanced water rescue, emergency care, teamwork, and supervision. Developed the judgment, knowledge, and skills required to prevent and respond to emergencies in aquatic environments.</p>
+              </RoadmapItem>
+
+              <RoadmapItem index={3} isLast={true}>
+                <div className="emoji">🏊‍♂️</div>
+                <h3>Swim Instructor Certification (20 hr.)</h3>
+                <p>Certified Swim Instructor after 20 hours of training. Learned to plan, teach, and evaluate swimming lessons for all ages. Developed skills in communication, demonstration, and feedback to help swimmers progress and achieve their goals in a safe and supportive environment.</p>
+              </RoadmapItem>
+            </Roadmap>
+          </div>
         </motion.div>
       </div>
 

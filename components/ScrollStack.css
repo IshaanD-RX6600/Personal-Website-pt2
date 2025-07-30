@@ -1,0 +1,124 @@
+.scroll-stack-scroller {
+  position: relative;
+  width: 100%;
+  height: 80vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: scroll-position;
+  /* Hide scrollbars */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  border-radius: 1.5rem;
+  background: transparent;
+  backdrop-filter: none;
+  border: none;
+}
+
+/* Hide scrollbars for WebKit browsers */
+.scroll-stack-scroller::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.scroll-stack-inner {
+  padding: 5vh 2rem 30vh;
+  min-height: 200vh;
+  position: relative;
+}
+
+.scroll-stack-card-wrapper {
+  position: relative;
+}
+
+.scroll-stack-card {
+  transform-origin: top center;
+  will-change: transform, filter;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  height: auto;
+  min-height: 12rem;
+  width: 100%;
+  max-width: 500px;
+  margin: 30px auto;
+  padding: 2.5rem;
+  border-radius: 1.5rem;
+  box-sizing: border-box;
+  background: rgba(31, 41, 55, 0.8);
+  backdrop-filter: blur(12px);
+  border: none;
+  /* Improve mobile performance */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  position: relative;
+  transition: box-shadow 0.3s ease;
+}
+
+.scroll-stack-card:hover {
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+}
+
+.scroll-stack-card h3 {
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  font-family: inherit;
+}
+
+.scroll-stack-card p {
+  color: rgb(209, 213, 219);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  font-family: inherit;
+}
+
+.scroll-stack-card .emoji {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  display: block;
+  text-align: left;
+}
+
+.scroll-stack-end {
+  width: 100%;
+  height: 1px;
+  opacity: 0;
+}
+
+@media (max-width: 768px) {
+  .scroll-stack-scroller {
+    height: 70vh;
+  }
+  
+  .scroll-stack-inner {
+    padding: 3vh 1rem 25vh;
+    min-height: 180vh;
+  }
+  
+  .scroll-stack-card {
+    padding: 2rem;
+    min-height: 10rem;
+    max-width: 100%;
+    margin: 20px auto;
+  }
+  
+  .scroll-stack-card .emoji {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .scroll-stack-card h3 {
+    font-size: 1.1rem;
+  }
+  
+  .scroll-stack-card p {
+    font-size: 0.85rem;
+  }
+}

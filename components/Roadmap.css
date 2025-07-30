@@ -1,0 +1,144 @@
+.roadmap-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.roadmap-item {
+  position: relative;
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.roadmap-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  position: relative;
+  z-index: 2;
+}
+
+.roadmap-node {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2rem;
+  width: 20px;
+  height: 20px;
+}
+
+.roadmap-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: 3px solid #064e3b;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+}
+
+.roadmap-line {
+  position: absolute;
+  left: 10px;
+  top: 2rem;
+  width: 3px;
+  height: calc(100% - 2rem);
+  background: linear-gradient(180deg, #10b981, #059669);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+  z-index: 1;
+}
+
+/* Hide the line for the last item */
+.roadmap-item:last-child .roadmap-line {
+  display: none;
+}
+
+.roadmap-card {
+  flex: 1;
+  background: rgba(31, 41, 55, 0.8);
+  backdrop-filter: blur(12px);
+  border: none;
+  border-radius: 16px;
+  padding: 24px;
+  color: white;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  min-height: 180px;
+}
+
+.roadmap-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.roadmap-card .emoji {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.roadmap-card h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #f8fafc;
+}
+
+.roadmap-card p {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #cbd5e1;
+  margin: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .roadmap-content {
+    gap: 1rem;
+  }
+  
+  .roadmap-card {
+    padding: 20px;
+  }
+  
+  .roadmap-card h3 {
+    font-size: 1.25rem;
+  }
+  
+  .roadmap-card p {
+    font-size: 0.9rem;
+  }
+  
+  .roadmap-card .emoji {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .roadmap-content {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .roadmap-node {
+    margin-top: 0;
+    margin-bottom: 1rem;
+  }
+  
+  .roadmap-line {
+    display: none;
+  }
+  
+  .roadmap-card {
+    margin-bottom: 1.5rem;
+  }
+}
