@@ -64,11 +64,13 @@ export default function BlogSlugPage({ params }: PageProps) {
             </div>
           )}
           {post.image && (
-            <div className="w-full mt-8 rounded-xl border border-white/10 bg-black/40 p-2 flex justify-center">
+            <div className="w-full mt-8 rounded-xl border border-white/10 bg-black/30 overflow-hidden">
               <BlogHeroImage
                 src={post.image}
                 alt={post.title}
-                className="w-full max-w-xl object-contain block h-auto"
+                className="w-full h-auto block object-contain sm:object-contain"
+                sizes="(max-width: 640px) 100vw, 640px"
+                priority
               />
             </div>
           )}
