@@ -3,7 +3,7 @@
 import Lightning from "@/components/Lightning";
 import SimpleDock from "@/components/SimpleDock";
 import GlitchText from "@/components/GlitchText";
-import { VscHome, VscArchive, VscAccount, VscSettingsGear, VscCode } from "react-icons/vsc";
+import { VscHome, VscArchive, VscAccount, VscSettingsGear, VscCode, VscBook } from "react-icons/vsc";
 
 export default function HomePage() {
   const handleNavigation = (path: string) => {
@@ -20,6 +20,7 @@ export default function HomePage() {
   const dockItems = [
     { icon: <VscHome size={18} />, label: 'Home', onClick: () => handleNavigation('/') },
     { icon: <VscCode size={18} />, label: 'Projects', onClick: () => handleNavigation('/projects') },
+    { icon: <VscBook size={18} />, label: 'Blog', onClick: () => handleNavigation('/blog') },
     { icon: <VscAccount size={18} />, label: 'About', onClick: () => handleNavigation('/about') },
     { icon: <VscArchive size={18} />, label: 'Resume', onClick: () => alert('Resume!') },
     { icon: <VscSettingsGear size={18} />, label: 'Contact', onClick: () => alert('Contact!') },
