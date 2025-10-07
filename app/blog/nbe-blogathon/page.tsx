@@ -77,7 +77,7 @@ export default function NbeBlogathonPost() {
               <li>&ldquo;WHITE | English meaning - Cambridge Dictionary.&rdquo; <em>Cambridge Dictionary</em>, 1 Oct. 2025, <a className="underline decoration-dotted hover:text-white" href="https://dictionary.cambridge.org/dictionary/english/white" target="_blank" rel="noopener noreferrer">https://dictionary.cambridge.org/dictionary/english/white</a>. Accessed 6 Oct. 2025.</li>
             </ol>
           </div>
-          {/* Removed duplicate image section after cropping; placeholder paragraph removed per request */}
+          {/* Removed duplicate image section after cropping; placeholder paragraph removed per requestl */}
         </motion.div>
       </div>
       <SimpleDock items={dockItems} />
