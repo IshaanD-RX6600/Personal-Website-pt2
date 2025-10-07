@@ -25,11 +25,11 @@ export default function BlogPage() {
       </div>
       <div className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-40">
         {/* Hero image for the blog section */}
-        <div className="w-full mb-8 overflow-hidden rounded-xl border border-white/10 bg-black/40">
+        <div className="w-full mb-8 rounded-xl border border-white/10 bg-black/40 p-2 flex justify-center">
           <BlogHeroImage
             src="/nbe-blogathon-beads.png"
             alt="Beaded keychain"
-            className="w-full h-44 md:h-64 object-cover block"
+            className="w-full max-w-xl object-contain block h-auto"
           />
         </div>
         <motion.h1

@@ -52,11 +52,11 @@ export default function BlogSlugPage({ params }: PageProps) {
       <div className="relative z-10 max-w-3xl mx-auto px-6 pt-24 pb-40">
         <div className="mb-10 transition-opacity duration-700">
           {post.image && (
-            <div className="w-full mb-6 overflow-hidden rounded-xl border border-white/10 bg-black/40">
+            <div className="w-full mb-6 rounded-xl border border-white/10 bg-black/40 p-2 flex justify-center">
               <BlogHeroImage
                 src={post.image}
                 alt={post.title}
-                className="w-full h-64 md:h-96 object-cover block"
+                className="w-full max-w-xl object-contain block h-auto"
               />
             </div>
           )}
