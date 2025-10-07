@@ -1,6 +1,7 @@
 "use client";
 import Lightning from "@/components/Lightning";
 import SimpleDock from "@/components/SimpleDock";
+import BlogHeroImage from "@/components/BlogHeroImage";
 import { blogPosts } from "@/lib/blogPosts";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -25,7 +26,11 @@ export default function BlogPage() {
       <div className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-40">
         {/* Hero image for the blog section */}
         <div className="w-full mb-8 overflow-hidden rounded-xl border border-white/10 bg-black/40">
-          <img src="/nbe-blogathon-beads.png" alt="Beaded keychain" className="w-full h-44 md:h-64 object-cover block" onError={(e)=>{const t=e.currentTarget; t.style.display='none';}} />
+          <BlogHeroImage
+            src="/nbe-blogathon-beads.png"
+            alt="Beaded keychain"
+            className="w-full h-44 md:h-64 object-cover block"
+          />
         </div>
         <motion.h1
           className="text-5xl md:text-6xl font-bold text-white mb-10"

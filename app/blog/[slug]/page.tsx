@@ -1,5 +1,6 @@
 import Lightning from '@/components/Lightning';
 import SimpleDock from '@/components/SimpleDock';
+import BlogHeroImage from '@/components/BlogHeroImage';
 import { blogPosts } from '@/lib/blogPosts';
 import { notFound } from 'next/navigation';
 import { VscHome, VscArchive, VscAccount, VscSettingsGear, VscCode, VscBook } from 'react-icons/vsc';
@@ -52,7 +53,11 @@ export default function BlogSlugPage({ params }: PageProps) {
         <div className="mb-10 transition-opacity duration-700">
           {post.image && (
             <div className="w-full mb-6 overflow-hidden rounded-xl border border-white/10 bg-black/40">
-              <img src={post.image} alt={post.title} className="w-full h-64 md:h-96 object-cover block" onError={(e)=>{const t=e.currentTarget; t.style.display='none';}} />
+              <BlogHeroImage
+                src={post.image}
+                alt={post.title}
+                className="w-full h-64 md:h-96 object-cover block"
+              />
             </div>
           )}
           <p className="text-xs uppercase tracking-wider text-red-300/70 font-semibold mb-3">
