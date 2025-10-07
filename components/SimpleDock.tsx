@@ -12,7 +12,7 @@ interface SimpleDockProps {
 
 export default function SimpleDock({ items }: SimpleDockProps) {
   const handleClick = (onClick: () => void, label: string) => {
-    console.log('Dock item clicked:', label); // Debug log
+    console.log('Dock item clicked:', label); // Debug logd
     try {
       onClick();
     } catch (error) {
