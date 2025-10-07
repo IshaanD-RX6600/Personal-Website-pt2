@@ -51,15 +51,6 @@ export default function BlogSlugPage({ params }: PageProps) {
       <div className="absolute inset-0"><Lightning hue={0} xOffset={0} speed={1} intensity={1.05} size={1} /></div>
       <div className="relative z-10 max-w-3xl mx-auto px-6 pt-24 pb-40">
         <div className="mb-10 transition-opacity duration-700">
-          {post.image && (
-            <div className="w-full mb-6 rounded-xl border border-white/10 bg-black/40 p-2 flex justify-center">
-              <BlogHeroImage
-                src={post.image}
-                alt={post.title}
-                className="w-full max-w-xl object-contain block h-auto"
-              />
-            </div>
-          )}
           <p className="text-xs uppercase tracking-wider text-red-300/70 font-semibold mb-3">
             {new Date(post.date).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}
           </p>
@@ -70,6 +61,15 @@ export default function BlogSlugPage({ params }: PageProps) {
               {post.tags.map(tag => (
                 <span key={tag} className="text-[11px] px-2 py-1 rounded-full bg-red-500/15 text-red-300 border border-red-500/30">{tag}</span>
               ))}
+            </div>
+          )}
+          {post.image && (
+            <div className="w-full mt-8 rounded-xl border border-white/10 bg-black/40 p-2 flex justify-center">
+              <BlogHeroImage
+                src={post.image}
+                alt={post.title}
+                className="w-full max-w-xl object-contain block h-auto"
+              />
             </div>
           )}
   </div>

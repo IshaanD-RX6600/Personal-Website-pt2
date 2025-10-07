@@ -1,7 +1,6 @@
 "use client";
 import Lightning from "@/components/Lightning";
 import SimpleDock from "@/components/SimpleDock";
-import BlogHeroImage from "@/components/BlogHeroImage";
 import { blogPosts } from "@/lib/blogPosts";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -24,14 +23,6 @@ export default function BlogPage() {
         <Lightning hue={0} xOffset={0} speed={1} intensity={1.1} size={1} />
       </div>
       <div className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-40">
-        {/* Hero image for the blog section */}
-        <div className="w-full mb-8 rounded-xl border border-white/10 bg-black/40 p-2 flex justify-center">
-          <BlogHeroImage
-            src="/nbe-blogathon-beads.png"
-            alt="Beaded keychain"
-            className="w-full max-w-xl object-contain block h-auto"
-          />
-        </div>
         <motion.h1
           className="text-5xl md:text-6xl font-bold text-white mb-10"
           initial={{ opacity: 0, y: 30 }}
