@@ -23,6 +23,10 @@ export default function BlogPage() {
         <Lightning hue={0} xOffset={0} speed={1} intensity={1.1} size={1} />
       </div>
       <div className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-40">
+        {/* Hero image for the blog section */}
+        <div className="w-full mb-8 overflow-hidden rounded-xl border border-white/10 bg-black/40">
+          <img src="/nbe-blogathon-beads.png" alt="Beaded keychain" className="w-full h-44 md:h-64 object-cover block" onError={(e)=>{const t=e.currentTarget; t.style.display='none';}} />
+        </div>
         <motion.h1
           className="text-5xl md:text-6xl font-bold text-white mb-10"
           initial={{ opacity: 0, y: 30 }}
