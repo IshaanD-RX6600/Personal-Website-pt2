@@ -1,10 +1,10 @@
 import Lightning from '@/components/Lightning';
-import SimpleDock from '@/components/SimpleDock';
+import BlogNavigationDock from '@/components/BlogNavigationDock';
 import { blogPosts } from '@/lib/blogPosts';
 import { notFound } from 'next/navigation';
 import { VscHome, VscArchive, VscAccount, VscSettingsGear, VscCode, VscBook } from 'react-icons/vsc';
 import { Metadata } from 'next';
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion';</parameter,
 
 interface PageProps { params: { slug: string } }
 
@@ -35,9 +35,7 @@ export function generateMetadata({ params }: PageProps): Metadata {
 
 export default function BlogSlugPage({ params }: PageProps) {
   const post = blogPosts.find(p => p.slug === params.slug);
-  if (!post) return notFound();
-
-  const handleNavigation = (path: string) => { try { window.location.href = path; } catch { window.location.assign(path); } };
+  if (!post) return notFound();</parameter,
   const dockItems = [
     { icon: <VscHome size={18} />, label: 'Home', onClick: () => handleNavigation('/') },
     { icon: <VscCode size={18} />, label: 'Projects', onClick: () => handleNavigation('/projects') },
