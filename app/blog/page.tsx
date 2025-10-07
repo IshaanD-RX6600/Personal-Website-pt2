@@ -49,16 +49,14 @@ export default function BlogPage() {
               transition={{ duration: 0.6, delay: 0.15 + idx * 0.1 }}
             >
               <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition" style={{ background: 'radial-gradient(circle at 30% 20%, rgba(255,0,0,0.25), transparent 70%)' }} />
-              <div className="relative h-40 w-full overflow-hidden bg-white/5 flex items-center justify-center">
-                {post.image ? (
-                  <img src={post.image} alt={post.title} className="h-full w-full object-cover opacity-80 group-hover:opacity-100 transition" onError={(e)=>{const t=e.currentTarget; t.style.display='none'; const p=t.parentElement; if(p) p.innerHTML='<div class=\\"text-xs text-white/60\\">No image</div>';}} />
-                ) : (
-                  <div className="text-xs text-white/60">No image</div>
-                )}
-                {post.videoUrl && (
-                  <span className="absolute top-2 right-2 text-[10px] px-2 py-1 rounded bg-red-600/80 text-white font-medium backdrop-blur-sm">Video</span>
-                )}
-              </div>
+              {post.image && (
+                <div className="relative h-40 w-full overflow-hidden bg-white/5 flex items-center justify-center">
+                  <img src={post.image} alt={post.title} className="h-full w-full object-cover opacity-80 group-hover:opacity-100 transition" onError={(e)=>{const t=e.currentTarget; t.style.display='none';}} />
+                  {post.videoUrl && (
+                    <span className="absolute top-2 right-2 text-[10px] px-2 py-1 rounded bg-red-600/80 text-white font-medium backdrop-blur-sm">Video</span>
+                  )}
+                </div>
+              )}
               <div className="p-6 flex flex-col flex-1">
               <time className="text-xs uppercase tracking-wider text-red-300/70 mb-2 font-semibold">
                 {new Date(post.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
