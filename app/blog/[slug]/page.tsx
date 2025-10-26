@@ -47,8 +47,8 @@ export default function BlogSlugPage({ params }: PageProps) {
   ];
 
   return (
-    <div className="min-h-screen relative">
-      <div className="absolute inset-0"><Lightning hue={0} xOffset={0} speed={1} intensity={1.05} size={1} /></div>
+    <div className="min-h-screen relative overflow-hidden">
+      <div className="fixed inset-0"><Lightning hue={0} xOffset={0} speed={1} intensity={1} size={0.5} /></div>
       <div className="relative z-10 max-w-3xl mx-auto px-6 pt-24 pb-40">
         <div className="mb-10 transition-opacity duration-700">
           <p className="text-xs uppercase tracking-wider text-red-300/70 font-semibold mb-3">
@@ -113,7 +113,60 @@ export default function BlogSlugPage({ params }: PageProps) {
         </div>
       </>
     )}
-    {post.slug !== 'nbe-blogathon' && (
+    {post.slug === 'uncovering-my-equilibrium' && (
+      <>
+        <div className="mb-8">
+          <div className="text-sm text-white/70 leading-relaxed">
+            <p>Ishaan Dhiman</p>
+            <p>Professor Mackenzie Martin</p>
+            <p>NBE3UI-01</p>
+            <p>26 October 2025</p>
+          </div>
+          <h1 className="text-2xl font-bold text-white mt-6 mb-8 text-center">Uncovering my Equilibrium</h1>
+        </div>
+
+        <p className="indent-8">After a lengthy trip from the Sunshine State of the United States of America, I was at peace with my inner self, I was determined to get back into my day-to-day routine ASAP. The car smelled faintly of coffee and of cold air as we travelled further and further north. Glancing at the car seat in front of me, my mind wandered about seeing my family again. As I entered through my front door, my parents' faces said more than just words.</p>
+
+        <p>This horrid news left me in awe. It felt like I had no sense, awareness, or reality. I was not able to process the emotions I was feeling. Once my evenings were filled with laughter and warmth; now, silence had taken their place. It was a different dimension of my emotional state that I had just tapped into. For days on end, I felt isolated from everything and everyone around me. Even my usual routine of coming home from school and doomscrolling for 1-2 hours changed to 3 hours of staring at the wall pondering and extensive hours of silence. My appetite dissipated from sight. The foods I enjoyed really had no taste anymore, the smell of dinner reminded me of emptiness. In my house food is enjoyed whenever a family member cooks because it's made out of compassion and you cannot replicate this level of compassion from Uber Eats. However, when we were ordering out every day because my father and mother were in India while I was back home with my aunt. This made the sensory experience of food dull, dreary, and depressing.</p>
+
+        <p>I believe that the Medicine Wheel should stay in proportion to ¼ to each other. This is the reason why some people are successful because they have time and the headspace for everything. "I forget the need to sometimes step back, take a deep breath, meditate, take a walk, and enjoy the smell of the flowers" (Anderson). This shows that true success is not just about working hard but also taking time for self-care and balancing the physical, mental, emotional, and spiritual aspects of life, which is symbolized by the Medicine Wheel. When I was faced with this disconsolate experience, I was overloaded with the emotion section of the Medicine Wheel. When one domain takes over, the others naturally fall apart. Because my emotional sector was so overloaded, I lost my appetite directly influencing my physical part, and I felt constantly drained. My mental focus eroded away; I couldn't concentrate in class or keep up with my usual interests. Even spiritually I felt disconnected questioning God why such sorrowful things happen to us humans.</p>
+
+        <p>At some point, I realized that this severity of imbalance wasn't something that would automatically mend itself, I had to take baby steps to regain my inner harmony with all of my systems. My grandfather always taught me the importance of patience and routine, and I found myself returning to his wise words and began eating more, not because I was hungry but because I needed to regain that harmony in myself again. I spent time outside, doing some very odd things like riding my bicycle on ice and almost suffering a minor concussion. I let the breeze hit my face as I recollected as I thought to myself about my past couple of weeks, and for the first time in a couple of weeks I felt a sense of clarity. Spiritually I really started to understand that grief is not the absence of connection but is a continuation of relation in a new form. Remembering his laughter and stories reminded me of his wisdom and ability. The balance of the Medicine Wheel was not restored in an instant. However, it was restored through a process.</p>
+
+        <p>My grandfather was a wise man just like many elderly people. But the root of why the elderly is so wise and why they give so many different perspectives and dimensions to different things in our lives. Oosthuizen says that, as people age, their thinking evolves, becoming more focused on their ability towards specific fields. An example of this is that my grandfather was an electrician, so he has a deep knowledge of that field. However, after retirement instead of completely quitting his concepts, he practiced more practical applications by more pen to paper style instead of real world applications in that field because he is unable to do so as he is retired and doesn't have access to those materials anymore. This shift towards integrative thinking, concatenating experiences with knowledge, really allows for flexible and complex thinking.</p>
+
+        <p>The importance of the medicine wheel lies in its ability to guide the balance and equilibrium in one's life. It gives us a reminder that true-wellbeing cannot exist when one aspect of the wheel is neglected (Mental, Emotional, Physical, and Spiritual). As Elder Mary Lee once said, "When one part of the wheel is broken, the whole circle falls apart." This shows how every part of life is interconnected, and it must be nurtured equally. The wheel encourages mindfulness, self-consciousness, and deep knowledge on the balance between all of us. By using the wheel as a guide, people live to learn with its teachings, which causes us to learn with compassion and understanding, which balances the world.</p>
+
+        <p>In light of the above, I learned that balance is not found; balance is built; balance is lived. Losing my grandfather threw my Medicine Wheel in a lopsided direction, but it also taught me that healing takes patience, reflection and connection. By steadily regaining control of my physical, emotional, and spiritual well-being, I began to fathom that grief really does not mean losing someone, it means learning to carry their memory in a different manner. My grandfather's wisdom continues to be my compass in my day-to-day life.</p>
+
+        <div className="aspect-video w-full rounded-xl overflow-hidden border border-white/10 bg-black/40 mt-8">
+          <iframe
+            src="https://www.youtube.com/embed/S7nb4rJ_N14"
+            title="YouTube video"
+            className="w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+
+        <div className="pt-8">
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent my-6" />
+          <h2 className="text-xl font-semibold text-white mb-6">Works Cited</h2>
+          <div className="text-white/70 text-sm leading-relaxed space-y-3">
+            <p>Anderson, Amy Rees. "The Importance Of Having Balance In Our Lives." <em>Forbes</em>, 31 May 2016, <a className="underline decoration-dotted hover:text-white" href="https://www.forbes.com/sites/amyanderson/2016/05/31/the-importance-of-having-balance-in-our-lives/" target="_blank" rel="noopener noreferrer">https://www.forbes.com/sites/amyanderson/2016/05/31/the-importance-of-having-balance-in-our-lives/</a>. Accessed 25 October 2025.</p>
+            
+            <p><em>Florida Vacations, Travel &amp; Tourism Guide | VISIT FLORIDA</em>, <a className="underline decoration-dotted hover:text-white" href="https://www.visitflorida.com/" target="_blank" rel="noopener noreferrer">https://www.visitflorida.com/</a>. Accessed 26 October 2025.</p>
+            
+            <p>Joseph, Bob. "What is an Indigenous Medicine Wheel?" <em>Indigenous Corporate Training Inc.</em>, <a className="underline decoration-dotted hover:text-white" href="https://www.ictinc.ca/blog/what-is-an-indigenous-medicine-wheel" target="_blank" rel="noopener noreferrer">https://www.ictinc.ca/blog/what-is-an-indigenous-medicine-wheel</a>. Accessed 26 October 2025.</p>
+            
+            <p>"MLA General Format." <em>Purdue OWL</em>, <a className="underline decoration-dotted hover:text-white" href="https://owl.purdue.edu/owl/research_and_citation/mla_style/mla_formatting_and_style_guide/mla_general_format.html" target="_blank" rel="noopener noreferrer">https://owl.purdue.edu/owl/research_and_citation/mla_style/mla_formatting_and_style_guide/mla_general_format.html</a>. Accessed 26 October 2025.</p>
+            
+            <p>Oosthuizen, Ivan. "Are older people wiser? | Center for Practical Wisdom | The University of Chicago." <em>University of Chicago Center for Practical Wisdom</em>, 4 May 2021, <a className="underline decoration-dotted hover:text-white" href="https://wisdomcenter.uchicago.edu/news/wisdom-news/are-older-people-wiser" target="_blank" rel="noopener noreferrer">https://wisdomcenter.uchicago.edu/news/wisdom-news/are-older-people-wiser</a>. Accessed 25 October 2025.</p>
+          </div>
+        </div>
+      </>
+    )}
+    {post.slug !== 'nbe-blogathon' && post.slug !== 'uncovering-my-equilibrium' && (
       <>
         <p>This is placeholder body content for <strong>{post.title}</strong>. Add your full article here. You can migrate to MDX later for headings, code blocks, images, and more.</p>
         <p>Ideas to enhance this page: table of contents, reading time, previous/next navigation, share buttons, and syntax highlighting.</p>

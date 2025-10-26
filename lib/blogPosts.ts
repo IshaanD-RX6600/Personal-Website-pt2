@@ -18,5 +18,13 @@ export const blogPosts: BlogPostMeta[] = [
   // Hero image file placed in /public. Attachment in repo is a PNG, ensure path matches.
   image: '/nbe-blogathon-beads.png',
   videoUrl: 'https://www.youtube.com/watch?v=OM4fXB23pCQ'
+  },
+  {
+    slug: 'uncovering-my-equilibrium',
+    title: 'Uncovering my Equilibrium',
+    excerpt: 'A journey of finding balance in life, work, and personal growth through self-reflection.',
+    date: '2025-10-26',
+    tags: ['personal', 'reflection', 'balance'],
+    image: '/equilibrium.jpg'
   }
 ];
