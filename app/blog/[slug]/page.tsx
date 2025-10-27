@@ -139,6 +139,14 @@ export default function BlogSlugPage({ params }: PageProps) {
 
         <p>In light of the above, I learned that balance is not found; balance is built; balance is lived. Losing my grandfather threw my Medicine Wheel in a lopsided direction, but it also taught me that healing takes patience, reflection and connection. By steadily regaining control of my physical, emotional, and spiritual well-being, I began to fathom that grief really does not mean losing someone, it means learning to carry their memory in a different manner. My grandfather's wisdom continues to be my compass in my day-to-day life.</p>
 
+        <div className="w-full mt-8 rounded-xl border border-white/10 bg-black/30 overflow-hidden">
+          <img
+            src="/Medicine-Wheel-1.webp"
+            alt="Medicine Wheel diagram showing the four quadrants representing Mental, Emotional, Physical, and Spiritual aspects of life"
+            className="w-full h-auto block object-contain"
+          />
+        </div>
+
         <div className="aspect-video w-full rounded-xl overflow-hidden border border-white/10 bg-black/40 mt-8">
           <iframe
             src="https://www.youtube.com/embed/S7nb4rJ_N14"
