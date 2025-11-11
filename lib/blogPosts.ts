@@ -26,5 +26,14 @@ export const blogPosts: BlogPostMeta[] = [
     date: '2025-10-26',
     tags: ['personal', 'reflection', 'balance'],
     image: '/equilibrium.jpg'
+  },
+  {
+    slug: 'whispers-of-the-kushtaka',
+    title: 'Whispers of the Kushtaka',
+    excerpt: 'Exploring the Tlingit legend of the shape-shifting Land-Otter Man and the cultural lessons about respect, caution, and the seen/unseen world.',
+    date: '2025-11-11',
+    tags: ['folklore', 'tlingit', 'myth', 'culture'],
+    videoUrl: 'https://www.youtube.com/watch?v=Uc6prRBCpS4',
+    image: '/kushtaka-drawing.webp'
   }
 ];

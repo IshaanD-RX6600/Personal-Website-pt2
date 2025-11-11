@@ -75,7 +75,7 @@ export default function BlogSlugPage({ params }: PageProps) {
             </div>
           )}
   </div>
-  <div className="prose prose-invert max-w-none text-sm leading-relaxed space-y-4">
+  <div className="prose prose-invert max-w-none text-sm leading-relaxed space-y-4 text-white/90">
     {post.slug === 'nbe-blogathon' && (
       <>
         <p>When I first constructed my keychain, I began to ponder whether or not the colors and string had a deeper meaning. I didn’t realize that each color actually reflects on who I am, what community I belong to, and what culture I am a part of. Identity is not just one singular characteristic; it's diverse, layered, and complex.</p>
@@ -174,7 +174,90 @@ export default function BlogSlugPage({ params }: PageProps) {
         </div>
       </>
     )}
-    {post.slug !== 'nbe-blogathon' && post.slug !== 'uncovering-my-equilibrium' && (
+    {post.slug === 'whispers-of-the-kushtaka' && (
+      <>
+        <div className="mb-8">
+          <div className="text-sm text-white/70 leading-relaxed">
+            <p>Ishaan Dhiman</p>
+            <p>Professor Mackenzie Martin</p>
+            <p>NBE3UI-01</p>
+            <p>11 November 2025</p>
+          </div>
+          <h1 className="text-2xl font-bold text-white mt-6 mb-8 text-center">Whispers of the Kushtaka</h1>
+        </div>
+
+        <p>     In the frosty waters of Southern Alaska there is a frightening creature that roams—the Kushtaka, also known as the Land-Otter Man. The Kushtaka is from the Tlingit culture in the south of Alaska and some parts of northern British Columbia. The Kushtaka is widely known for its shapeshifting abilities and can appear as a human, an otter, or even someone you love. The creature uses a sneaky method to bring victims closer to their end. The creature is also known as the Kóoshdaa Káa, which means Kushtaka in Tlingit. As Bjorn Dihle, Alaskan writer and journalist, says, “I’d heard stories of the Kóoshdaa Káa being a furry monster that could shapeshift into the form of a loved one, or play tricks like mimicking the sound of a crying infant to bring you into the woods or out to sea” (Dihle, <em>Outdoor Life</em>).</p>
+
+        <p>The origins of the Kushtaka are interconnected with the Tlingit worldview. The Tlingit people have lived along the Alaskan coast for a millennium and have developed a deeply connected oral tradition to pass their knowledge down the generations. The Kushtaka is not just a “boogeyman” but a threat to Tlingit beliefs. Catherine Armstrong states, “The Tlingit people believe that the otters are shape shifters that look like men. These creatures have a purely evil purpose. They trap their victims’ souls and prevent them from reincarnating” (Armstrong, <em>Only in Your State</em>). The quotation from Catherine Armstrong explains that in Tlingit belief, the Kushtaka is not just a myth with a purpose of scaring the living daylights out of people. However, it stands for something truly evil and spiritually lethal.</p>
+
+        <p>The Kushtaka is way more than just a myth; it is a showcase of the Tlingit worldview, where the spiritual world and the physical world intertwine. In some stories, the creature is described solely as evil, while others show how it can use its deceptive savior. Aaron Ilya Dabbah, a folklore writer, explains that the Kushtaka may seem helpful on occasions: “The land otter seeks to ‘save’ the people drowning or lost in the forest. The people who were caught in the mix were taken by the Land Otter People to their homes and dens to convert into one of them or ruthlessly take their lives” (Dabbah, <em>Anderson Design Group</em>). The Kushtaka shows the fine line between help and harm in nature.</p>
+
+        <p>One of the most petrifying aspects of the Kushtaka is how it deals with us humans. The creature lures people by mimicking or mocking sounds or making voices of someone familiar, whether that be a close family member. Children are the most vulnerable, as the Kushtaka is widely known to target the weak and defenseless, serving as a warning to the community to stay vigilant and aware in the wilderness and keep in mind the dangers of the land and water around them. According to Catherine Armstrong, “Sometimes the Kushtaka don’t bother, they just tear the victim into shreds” (Dabbah, <em>Anderson Design Group</em>). This shows how deadly the creature can be and why the Tlingit stories really emphasize respect for the natural environment.</p>
+
+        <p>Tlingit storytelling is deeply rooted with the Kushtaka, being the way communities pass on knowledge generation after generation. One well known story from Sitka, Alaska, tells of a man and his wife who were struggling during a famine. Their drowned son—who they previously thought became a Kushtaka—appeared to help them catch fish and seals, eating only raw food and looking part otter, part human. The son disappeared on the way back to Sitka, and the parents honored him with a feast (Sitka). This story shows how the Kushtaka could act as a helper and a trickster. It also shows the Tlingit understanding that the spiritual and natural worlds are deeply connected.</p>
+
+        <p>In today's date, the Kushtaka continues to inspire stories, films, and other forms of media, representing how traditional folklore can evolve while still respecting its origin that it came from. One notable example of this modern adaptation of the Kushtaka is Cameron Currin’s short film <em>Kushtaka</em>, which was released in late 2019. The 15-minute black-and-white film, with no script or dialogue, follows a single old man being stalked by the creature while searching for gold in Alaska. Currin, a Coast Guard member and filmmaker, took direct inspiration from the Tlingit legend to craft a film that captures both the fear and the mystery surrounding the Land Otter Man. The film's crew was mostly volunteers and the budget was around $10,000, and its visual style really aided the eerie and unpredictable nature of the Kushtaka (Barnwell).</p>
+
+        <p>In light of the above, the Kushtaka, or Land-Otter Man, is more than just a terrifying creature in Tlingit folklore. Its shape-shifting abilities, predatory instincts, and connection to the spiritual world and the world around us show us mere mortals the deep cultural lessons about respect, caution, and assessing and understanding the environment around us. Through traditional storytelling, legends like the Sitka tale, and modern interpretations such as Cameron Currin’s film, the Kushtaka continues to captivate audiences. By digging deeper into the past of this creature, we gain knowledge and information about the Tlingit worldview, where the boundary of the things that are seen and unseen is fluid, and where stories serve as lore and important moral guidance.</p>
+
+        {post.videoUrl && (
+          <div className="aspect-video w-full rounded-xl overflow-hidden border border-white/10 bg-black/40">
+            <iframe
+              src={post.videoUrl.replace('watch?v=','embed/')}
+              title="YouTube video"
+              className="w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        )}
+
+        <div className="pt-8">
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent my-6" />
+          <h2 className="text-xl font-semibold text-white mb-4">Source Analysis</h2>
+          <div className="text-white/70 text-sm leading-relaxed space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-2">Bjorn Dihle</h3>
+              <p>This source is proper because Bjorn Dihle is an Alaskan-native journalist and writer with expansive knowledge and firsthand experience with the Tlingit people. He has been published in various types of journals such as <em>Sierra</em>, <em>Alaska</em>, and <em>Adventure Kayak</em>. His work shows deep conceptual understanding of Alaskan Indigenous culture, and his stories directly draw from local sources.</p>
+              <p><strong>Ethos:</strong> Bjorn Dihle’s credibility comes from his background and personal experience. Dihle grew up in Alaska, he has had firsthand exposure to the stories and cultural beliefs of the Tlingit peoples. His extensive record of publications is in respected journals which are also set up as another point of credibility and a trustworthy source on his local folklore and culture.</p>
+              <p><strong>Logos:</strong> The article shows factual information about the Kushtaka’s characteristics, behavior, and cultural significance. An example being, “I’d heard stories of the Kóoshdaa Káa being a furry monster that could shapeshift into the form of a loved one, or play tricks like mimicking the sound of a crying baby to lure you into the woods or out to sea” (Dihle, <em>Outdoor Life</em>). This quotation shows the mythological aspects of the creature and the lessons that the Tlingit people have learned or adapted from it. The logical presentation of these details really helps me understand the context of the Tlingit culture and the Kushtaka.</p>
+              <p><strong>Pathos:</strong> Dihle’s storytelling really engages me as a reader by touching on the mysterious nature of the Kushtaka, evoking curiosity and a well-rounded sense of caution. The author shares stories from his own upbringing and emphasizing the danger of the elements of the Kóoshdaa Káa (supernatural), he engages the audience into folklore through evoking emotion which makes it more informative and a compelling read.</p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-2">Catherine Armstrong</h3>
+              <p>This source is appropriate because Catherine Armstrong is a credible writer and editor. She also loves to research regional folklore. Her article, published on <em>Only In Your State</em>, presents the legend of the Kushtaka from the perspective of the Tlingit people, providing cultural context to the myth rather than teaching just as another supernatural being.</p>
+              <p><strong>Ethos:</strong> Armstrong builds credibility through her vast experiences as a professional travel and culture writer and her respectful representation of Indigenous stories. She shares the Tlingit peoples 10,000 year old history in Alaska and some parts of Canada. Her writing has factual and a culturally sensitive tone which shows her responsibility in referencing the Tlingit people making her a credible source.</p>
+              <p><strong>Logos:</strong> The article is clear and a logical overview of the Kushtaka legend, showing how the creature relies on pretending to be recognizable to the victim by using a similar voice as a known-to so that they can trap them or transform them. “The Tlingit believe that some otters are actually shape-shifters that look like men. These creatures have an evil purpose—to trap their victims’ souls and prevent them from reincarnating” (Armstrong, <em>Only In Your State</em>). This helps the reader to really digest the symbolism behind her story rather than showing it as folklore.</p>
+              <p><strong>Pathos:</strong> Armstrong’s writing really brings out a mix of curiosity and fear by comparing and contrasting the side of the otter which is cute and the side of the otter which brings the sinister to the Kushtaka. Her imagery and suspenseful tone and the reader can really imagine an encounter with the Kushtaka. She creates a connection between the reader and the message between the legend.</p>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-2">Aaron Ilya Dabbah</h3>
+              <p>This source is credible because it gives vivid information about the Kushtaka and where the legend comes from. It talks about the Tlingit beliefs and how the creature connects to their view of the world. The author also uses old stories to explain what the Kushtaka means.</p>
+              <p><strong>Ethos:</strong> Aaron Ilya Dabbah is a well known writer who studies mythology and folklore from around the world. He uses stories and research to support what he says about the Kushtaka. He gives credit to Tlingit stories. While he isn’t from the Tlingit culture, he treats their traditions with respect when writing about it. Making him a trustworthy source.</p>
+              <p><strong>Logos:</strong> The author explains that the creature isn’t just a ruthless monster, but it's a mix of good and bad. It sometimes helps people and other times tricks them and harms them. He connects the story to Tlingit beliefs about nature and the spirit world. His writing has a lot of examples and real examples from Tlingit beliefs.</p>
+              <p><strong>Pathos:</strong> The article made me feel curious and scared at the same time. The author shows how the Kushtaka looks and acts in a specific way to attract readers into the story. But he also shows how the legend gives us valuable lessons about respecting and understanding the world around us. Making the story more emotionally interesting.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-8">
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent my-6" />
+          <h2 className="text-xl font-semibold text-white mb-6">Works Cited</h2>
+          <div className="text-white/70 text-sm leading-relaxed space-y-3">
+            <p>Barnwell, Jack. “The Kodiak Coastie who created 'Kushtaka,' the horror that is Land-Otter Man.” <em>Navy Times</em>, 12 January 2019, <a className="underline decoration-dotted hover:text-white" href="https://www.navytimes.com/news/your-navy/2019/01/13/the-kodiak-coastie-who-created-kushtaka-the-horror-that-is-land-otter-man/" target="_blank" rel="noopener noreferrer">https://www.navytimes.com/news/your-navy/2019/01/13/the-kodiak-coastie-who-created-kushtaka-the-horror-that-is-land-otter-man/</a>. Accessed 10 November 2025.</p>
+            <p>Dihle, Bjorn. “Bjorn Dihle.” <em>MeatEater Crew</em>, MeatEater, 2025, <a className="underline decoration-dotted hover:text-white" href="https://www.themeateater.com/people/bjorn-dihle" target="_blank" rel="noopener noreferrer">https://www.themeateater.com/people/bjorn-dihle</a>. Accessed 10 November 2025.</p>
+            <p>Dihle, Bjorn. “The Tlingit Legend of the Kóoshdaa Káa.” <em>Outdoor Life</em>, 13 October 2025, <a className="underline decoration-dotted hover:text-white" href="https://www.outdoorlife.com/adventure/tlingit-legend-of-kooshdaa-kaa/" target="_blank" rel="noopener noreferrer">https://www.outdoorlife.com/adventure/tlingit-legend-of-kooshdaa-kaa/</a>. Accessed 10 November 2025.</p>
+            <p>Dabbah, Aaron Ilya. “The Fearsome Alaskan Tlingit Kushtaka: If it’s not One Thing, it’s an Otter.” <em>EsoterX</em>, 9 January 2013, <a className="underline decoration-dotted hover:text-white" href="https://esoterx.com/2013/01/09/the-fearsome-alaskan-tlingit-kushtaka-if-its-not-one-thing-its-an-otter/" target="_blank" rel="noopener noreferrer">https://esoterx.com/2013/01/09/the-fearsome-alaskan-tlingit-kushtaka-if-its-not-one-thing-its-an-otter/</a>.</p>
+            <p>“Legends Of The National Parks: Gates Of The Arctic's Kushtaka.” <em>Anderson Design Group</em>, <a className="underline decoration-dotted hover:text-white" href="https://www.andersondesigngroupstore.com/a/collections/61-american-national-parks/legends-of-the-national-parks-gates-of-the-arctics-kushtaka" target="_blank" rel="noopener noreferrer">https://www.andersondesigngroupstore.com/a/collections/61-american-national-parks/legends-of-the-national-parks-gates-of-the-arctics-kushtaka</a>. Accessed 10 November 2025.</p>
+            <p>“The Alaska Legend Of Kushtaka Will Send Chills Down Your Spine.” <em>Only In Your State</em>, 5 January 2023, <a className="underline decoration-dotted hover:text-white" href="https://www.onlyinyourstate.com/experiences/alaska/kushtaka-land-otter-legend-ak" target="_blank" rel="noopener noreferrer">https://www.onlyinyourstate.com/experiences/alaska/kushtaka-land-otter-legend-ak</a>. Accessed 10 November 2025.</p>
+            <p>N/A. “The Land‑Otter Son: A Kushtaka Story.” <em>Sitka.com</em>, Sitka.com. Accessed 10 November 2025.</p>
+          </div>
+        </div>
+      </>
+    )}
+    {post.slug !== 'nbe-blogathon' && post.slug !== 'uncovering-my-equilibrium' && post.slug !== 'whispers-of-the-kushtaka' && (
       <>
         <p>This is placeholder body content for <strong>{post.title}</strong>. Add your full article here. You can migrate to MDX later for headings, code blocks, images, and more.</p>
         <p>Ideas to enhance this page: table of contents, reading time, previous/next navigation, share buttons, and syntax highlighting.</p>
