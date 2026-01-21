@@ -1,4 +1,3 @@
-import Lightning from '@/components/Lightning';
 import SimpleDock from '@/components/SimpleDock';
 import BlogHeroImage from '@/components/BlogHeroImage';
 import { blogPosts } from '@/lib/blogPosts';
@@ -47,8 +46,7 @@ export default function BlogSlugPage({ params }: PageProps) {
   ];
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      <div className="fixed inset-0"><Lightning hue={0} xOffset={0} speed={1} intensity={1} size={0.5} /></div>
+    <div className="min-h-screen relative overflow-hidden bg-black">
       <div className="relative z-10 max-w-3xl mx-auto px-6 pt-24 pb-40">
         <div className="mb-10 transition-opacity duration-700">
           <p className="text-xs uppercase tracking-wider text-red-300/70 font-semibold mb-3">

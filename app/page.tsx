@@ -1,6 +1,5 @@
 "use client";
 
-import Lightning from "@/components/Lightning";
 import SimpleDock from "@/components/SimpleDock";
 import GlitchText from "@/components/GlitchText";
 import { VscHome, VscArchive, VscAccount, VscSettingsGear, VscCode, VscBook } from "react-icons/vsc";
@@ -27,18 +26,7 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Lightning Background */}
-      <div className="absolute inset-0">
-        <Lightning
-          hue={220}
-          xOffset={0}
-          speed={1}
-          intensity={1}
-          size={1}
-        />
-      </div>
-      
+    <div className="min-h-screen relative overflow-hidden bg-black">
       {/* Content */}
       <div className="relative z-10 flex items-center justify-center min-h-screen">
         <GlitchText

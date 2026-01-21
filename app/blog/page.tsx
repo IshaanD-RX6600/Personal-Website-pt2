@@ -1,5 +1,4 @@
 "use client";
-import Lightning from "@/components/Lightning";
 import SimpleDock from "@/components/SimpleDock";
 import { blogPosts } from "@/lib/blogPosts";
 import { motion } from "framer-motion";
@@ -17,11 +16,7 @@ export default function BlogPage() {
   ];
 
   return (
-    <div className="min-h-screen relative">
-      {/* Red lightning background (hue around 0 = red) */}
-      <div className="absolute inset-0">
-        <Lightning hue={0} xOffset={0} speed={1} intensity={1.1} size={1} />
-      </div>
+    <div className="min-h-screen relative bg-black">
       <div className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-40">
         <motion.h1
           className="text-5xl md:text-6xl font-bold text-white mb-10"

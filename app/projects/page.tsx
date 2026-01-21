@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from 'react';
-import Lightning from "@/components/Lightning";
 import SimpleDock from "@/components/SimpleDock";
 import StarBorder from "@/components/StarBorder";
 import { VscHome, VscArchive, VscAccount, VscSettingsGear, VscCode, VscGithub, VscLinkExternal, VscBook } from "react-icons/vsc";
@@ -88,18 +87,7 @@ export default function ProjectsPage() {
   ];
 
   return (
-    <div className="min-h-screen relative">
-      {/* Purple Lightning Background */}
-      <div className="absolute inset-0">
-        <Lightning
-          hue={280}
-          xOffset={0}
-          speed={1}
-          intensity={1}
-          size={1}
-        />
-      </div>
-      
+    <div className="min-h-screen relative bg-black">
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center min-h-screen p-8 pt-20 pb-32">
         <motion.h1 
