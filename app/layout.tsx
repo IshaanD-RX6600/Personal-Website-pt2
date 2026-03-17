@@ -8,9 +8,12 @@ const inter = Inter({ subsets: ["latin"], display: "swap" })
 const poppins = Poppins({ weight: ["700", "900"], subsets: ["latin"], display: "swap", variable: "--font-poppins" })
 
 export const metadata: Metadata = {
-  title: "Your Name - Personal Website",
+  title: "Ishaan Dhiman - Personal Website",
   description: "Full Stack Developer passionate about creating beautiful, functional web experiences",
-    generator: 'v0.dev'
+  generator: 'v0.dev',
+  icons: {
+    icon: '/favicon.ico',
+  },
 }
 
 export default function RootLayout({
