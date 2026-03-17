@@ -11,15 +11,14 @@ export default function BlogPage() {
     { icon: <VscCode size={18} />, label: 'Projects', href: '/projects' },
     { icon: <VscBook size={18} />, label: 'Blog', href: '/blog' },
     { icon: <VscAccount size={18} />, label: 'About', href: '/about' },
-    { icon: <VscArchive size={18} />, label: 'Resume', href: '/resume' },
     { icon: <VscSettingsGear size={18} />, label: 'Contact', href: '/contact' },
   ];
 
   return (
     <div className="min-h-screen relative bg-black">
-      <div className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-40">
+      <div className="relative z-10 flex flex-col items-center min-h-screen p-8 pt-20 pb-32">
         <motion.h1
-          className="text-5xl md:text-6xl font-bold text-white mb-10"
+          className="text-5xl md:text-7xl font-bold text-white text-center mb-4"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -27,14 +26,14 @@ export default function BlogPage() {
           Blog
         </motion.h1>
         <motion.p
-          className="text-gray-300 text-lg mb-12 max-w-2xl"
+          className="text-gray-300 text-lg mb-12 max-w-2xl text-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
           Thoughts on english, coding, learning, problem solving, and building cool things.
         </motion.p>
-        <div className="grid sm:grid-cols-2 gap-8">
+        <div className="grid sm:grid-cols-2 gap-8 max-w-5xl w-full">
           {blogPosts.map((post, idx) => (
             <motion.article
               key={post.slug}

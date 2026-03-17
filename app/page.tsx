@@ -10,7 +10,6 @@ export default function HomePage() {
     { icon: <VscCode size={18} />, label: 'Projects', href: '/projects' },
     { icon: <VscBook size={18} />, label: 'Blog', href: '/blog' },
     { icon: <VscAccount size={18} />, label: 'About', href: '/about' },
-    { icon: <VscArchive size={18} />, label: 'Resume', href: '/resume' },
     { icon: <VscSettingsGear size={18} />, label: 'Contact', href: '/contact' },
   ];
 
