@@ -79,3 +79,30 @@ html {
   overflow: hidden;
   height: 100vh;
 }
+
+/* Smooth infinite marquee animation */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-container {
+  overflow: hidden;
+  width: 100%;
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.marquee-content {
+  display: flex;
+  width: max-content;
+  animation: scroll 25s linear infinite;
+}
+
+.marquee-content:hover {
+  animation-play-state: running;
+}

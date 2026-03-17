@@ -22,6 +22,7 @@ export default function ProjectsPage() {
     { icon: <VscHome size={18} />, label: 'Home', href: '/' },
     { icon: <VscCode size={18} />, label: 'Projects', href: '/projects' },
     { icon: <VscBook size={18} />, label: 'Blog', href: '/blog' },
+    { icon: <VscAccount size={18} />, label: 'About', href: '/about' },
     { icon: <VscArchive size={18} />, label: 'Resume', href: '/resume' },
     { icon: <VscSettingsGear size={18} />, label: 'Contact', href: '/contact' },
   ];
@@ -49,11 +50,11 @@ export default function ProjectsPage() {
       image: "/Screenshot 2025-07-28 233413.png"
     },
     {
-      title: "Personal Portfolio",
-      description: "My personal portfolio website showcasing my projects, skills, and experience in web development.",
-      liveUrl: "https://ishaan-dhiman.vercel.app/",
-      githubUrl: "https://github.com/IshaanD-RX6600/IshaanDhiman",
-      image: "/Screenshot 2025-07-28 233435.png"
+      title: "Waypoint",
+      description: "AI-powered case memory platform for social workers with voice ingestion, crisis-aware dashboards, and thread-scoped RAG for secure case management.",
+      liveUrl: "https://www.youtube.com/watch?v=hxuZ9ZgZLvk",
+      githubUrl: "https://github.com/IshaanD-RX6600/Waypoint",
+      image: "/Screenshot 2026-03-17 152816.png"
     },
     {
       title: "FormFlux",
@@ -77,11 +78,11 @@ export default function ProjectsPage() {
       image: "/Move-Master.png"
     },
     {
-      title: "Pantry Tracker",
-      description: "Hackathon project showcasing innovative solutions and collaborative development during the HawkHacks event.",
-      liveUrl: null,
-      githubUrl: "https://github.com/RohanZ2/HawkHacks",
-      image: "coming-soon"
+      title: "Shurplus",
+      description: "A dual-engine platform for food rescue connecting distributors, volunteers, and food banks with AI-powered inventory management and smart routing.",
+      liveUrl: "https://shurplus.vercel.app/",
+      githubUrl: "https://github.com/SaiAmartya/sharingsurplus",
+      image: "/Screenshot 2026-03-17 152604.png"
     }
   ];
 

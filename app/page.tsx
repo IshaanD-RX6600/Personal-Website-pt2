@@ -5,21 +5,11 @@ import GlitchText from "@/components/GlitchText";
 import { VscHome, VscArchive, VscAccount, VscSettingsGear, VscCode, VscBook } from "react-icons/vsc";
 
 export default function HomePage() {
-  const handleNavigation = (path: string) => {
-    console.log('Navigating to:', path); // Debug log
-    try {
-      window.location.href = path;
-    } catch (error) {
-      console.error('Navigation error:', error);
-      // Fallback navigation
-      window.location.assign(path);
-    }
-  };
-
   const dockItems = [
     { icon: <VscHome size={18} />, label: 'Home', href: '/' },
     { icon: <VscCode size={18} />, label: 'Projects', href: '/projects' },
     { icon: <VscBook size={18} />, label: 'Blog', href: '/blog' },
+    { icon: <VscAccount size={18} />, label: 'About', href: '/about' },
     { icon: <VscArchive size={18} />, label: 'Resume', href: '/resume' },
     { icon: <VscSettingsGear size={18} />, label: 'Contact', href: '/contact' },
   ];

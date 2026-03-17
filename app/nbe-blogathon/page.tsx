@@ -10,11 +10,12 @@ export default function BlogSinglePage() {
   const post = blogPosts[0];
   const handleNavigation = (path: string) => { try { window.location.href = path; } catch { window.location.assign(path); } };
   const dockItems = [
-    { icon: <VscHome size={18} />, label: 'Home', onClick: () => handleNavigation('/') },
-    { icon: <VscCode size={18} />, label: 'Projects', onClick: () => handleNavigation('/projects') },
-    { icon: <VscBook size={18} />, label: 'Blog', onClick: () => handleNavigation('/blog') },
-    { icon: <VscArchive size={18} />, label: 'Resume', onClick: () => alert('Resume!') },
-    { icon: <VscSettingsGear size={18} />, label: 'Contact', onClick: () => alert('Contact!') },
+    { icon: <VscHome size={18} />, label: 'Home', href: '/' },
+    { icon: <VscCode size={18} />, label: 'Projects', href: '/projects' },
+    { icon: <VscBook size={18} />, label: 'Blog', href: '/blog' },
+    { icon: <VscAccount size={18} />, label: 'About', href: '/about' },
+    { icon: <VscArchive size={18} />, label: 'Resume', href: '/resume' },
+    { icon: <VscSettingsGear size={18} />, label: 'Contact', href: '/contact' },
   ];
   return (
     <div className="min-h-screen relative">
