@@ -11,9 +11,6 @@ export const metadata: Metadata = {
   title: "Ishaan Dhiman - Personal Website",
   description: "Full Stack Developer passionate about creating beautiful, functional web experiences",
   generator: 'v0.dev',
-  icons: {
-    icon: '/favicon.ico',
-  },
 }
 
 export default function RootLayout({
