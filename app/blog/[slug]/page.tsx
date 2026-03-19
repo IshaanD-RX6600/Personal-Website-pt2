@@ -5,13 +5,14 @@ import { notFound } from 'next/navigation';
 import { VscHome, VscArchive, VscAccount, VscSettingsGear, VscCode, VscBook } from 'react-icons/vsc';
 import { Metadata } from 'next';
 
-interface PageProps { params: { slug: string } }
+interface PageProps { params: Promise<{ slug: string }> }
 
 export function generateStaticParams() {
   return blogPosts.map(p => ({ slug: p.slug }));
 }
 
-export function generateMetadata({ params }: PageProps): Metadata {
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+  const params = await props.params;
   const post = blogPosts.find(p => p.slug === params.slug);
   if (!post) return { title: 'Post Not Found' };
   const title = post.title + ' | Blog';
@@ -32,7 +33,8 @@ export function generateMetadata({ params }: PageProps): Metadata {
   };
 }
 
-export default function BlogSlugPage({ params }: PageProps) {
+export default async function BlogSlugPage(props: PageProps) {
+  const params = await props.params;
   const post = blogPosts.find(p => p.slug === params.slug);
   if (!post) return notFound();
 
