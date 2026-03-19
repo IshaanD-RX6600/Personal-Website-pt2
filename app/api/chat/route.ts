@@ -45,7 +45,7 @@ export async function POST(req: Request) {
     Keep responses relatively short as this is a chat interface.`;
 
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       systemInstruction: systemPrompt
     });
 
