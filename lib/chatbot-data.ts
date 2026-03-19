@@ -98,5 +98,30 @@ export const portfolioData = {
   socials: {
     github: "https://github.com/IshaanD-RX6600",
     linkedin: "https://www.linkedin.com/in/ishaan-d-835a872a4"
-  }
+  },
+  blogs: [
+    {
+      title: "The Story of Colors",
+      slug: "nbe-blogathon",
+      excerpt: "A strand of beads and a sequence of shades telling a small event story.",
+      date: "2025-10-05",
+      tags: ["event", "blogathon"],
+      videoUrl: "https://www.youtube.com/watch?v=OM4fXB23pCQ"
+    },
+    {
+      title: "Uncovering my Equilibrium",
+      slug: "uncovering-my-equilibrium",
+      excerpt: "A journey of finding balance in life, work, and personal growth through self-reflection.",
+      date: "2025-10-26",
+      tags: ["personal", "reflection", "balance"]
+    },
+    {
+      title: "Whispers of the Kushtaka",
+      slug: "whispers-of-the-kushtaka",
+      excerpt: "Exploring the Tlingit legend of the shape-shifting Land-Otter Man and the cultural lessons about respect, caution, and the seen/unseen world.",
+      date: "2025-11-11",
+      tags: ["folklore", "tlingit", "myth", "culture"],
+      videoUrl: "https://www.youtube.com/watch?v=Uc6prRBCpS4"
+    }
+  ]
 };
