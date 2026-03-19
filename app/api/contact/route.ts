@@ -12,9 +12,21 @@ export async function POST(request: Request) {
     }
 
     const apiKey = process.env.RESEND_API_KEY;
+    const contactEmail = process.env.CONTACT_EMAIL;
+    const contactEmailIsValid =
+      typeof contactEmail === 'string' &&
+      /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(contactEmail);
     
     if (!apiKey) {
-      console.error('RESEND_API_KEY is not set');
+      console.error('Contact service API key is not configured');
+      return NextResponse.json(
+        { error: 'Server configuration error' },
+        { status: 500 }
+      );
+    }
+
+    if (!contactEmailIsValid) {
+      console.error('Contact recipient email is not configured correctly');
       return NextResponse.json(
         { error: 'Server configuration error' },
         { status: 500 }
@@ -29,7 +41,7 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         from: 'Contact Form <onboarding@resend.dev>',
-        to: 'dhimanishaan7@gmail.com',
+        to: contactEmail,
         reply_to: email,
         subject: `New Contact from ${name}`,
         html: `
@@ -45,16 +57,16 @@ export async function POST(request: Request) {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Resend API error:', data);
+      console.error('Failed to send email');
       return NextResponse.json(
-        { error: data.message || 'Failed to send email' },
+        { error: 'Failed to send email' },
         { status: 500 }
       );
     }
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Contact form error:', error);
+  } catch {
+    console.error('Contact form request failed');
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -22,6 +22,14 @@ Continue building your app on:
 
 **[https://v0.dev/chat/projects/DOZu6z74RCa](https://v0.dev/chat/projects/DOZu6z74RCa)**
 
+## Environment Variables
+
+Create a `.env.local` file from `.env.example` and set:
+
+- `GOOGLE_API_KEY` for the chat API route
+- `RESEND_API_KEY` for the contact API route
+- `CONTACT_EMAIL` for the destination inbox used by the contact form
+
 ## How It Works
 
 1. Create and modify your project using [v0.dev](https://v0.dev)

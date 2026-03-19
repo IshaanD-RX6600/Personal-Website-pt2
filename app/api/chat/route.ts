@@ -9,8 +9,8 @@ export async function POST(req: Request) {
     const apiKey = process.env.GOOGLE_API_KEY;
 
     if (!apiKey) {
-      console.error("API key is missing");
-      return NextResponse.json({ error: "API key not configured" }, { status: 500 });
+      console.error("Chat service is not configured");
+      return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
     }
 
 
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
     
     return NextResponse.json({ response: text });
   } catch (error: any) {
-    console.error("Chat error:", error);
-    return NextResponse.json({ error: "Failed to process chat request", details: error.message }, { status: 500 });
+    console.error("Failed to process chat request");
+    return NextResponse.json({ error: "Failed to process chat request" }, { status: 500 });
   }
 }
