@@ -116,13 +116,14 @@ export default function ProjectsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.6 + (index * 0.1) }}
+                className="h-full"
               >
                 <StarBorder
                   color={colors[index % colors.length]}
                   speed={speeds[index % speeds.length]}
-                  className="w-full"
+                  className="w-full h-full"
                 >
-                <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden hover:border-purple-500/40 hover:bg-white/[0.06] transition-all duration-300 cursor-pointer group">
+                <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden hover:border-purple-500/40 hover:bg-white/[0.06] transition-all duration-300 cursor-pointer group flex flex-col h-full">
                   {/* Project Image */}
                   <div className="w-full h-48 bg-gray-800/50 flex items-center justify-center overflow-hidden">
                     {project.image === "coming-soon" ? (
@@ -144,9 +145,9 @@ export default function ProjectsPage() {
                     )}
                   </div>
                   {/* Project Content */}
-                  <div className="p-6">
+                  <div className="p-6 flex flex-col flex-1">
                     <h3 className="text-xl font-bold text-white mb-3 group-hover:text-purple-300 transition-colors duration-300">{project.title}</h3>
-                    <p className="text-zinc-300 mb-4 text-sm group-hover:text-zinc-200 transition-colors duration-300">{project.description}</p>
+                    <p className="text-zinc-300 mb-4 text-sm group-hover:text-zinc-200 transition-colors duration-300 flex-1">{project.description}</p>
                     <div className="flex gap-3">
                       {project.liveUrl && (
                         <a
