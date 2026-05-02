@@ -48,9 +48,10 @@ export default async function BlogSlugPage(props: PageProps) {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-black">
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.12),transparent_50%)] pointer-events-none z-0" />
       <div className="relative z-10 max-w-3xl mx-auto px-6 pt-24 pb-40">
         <div className="mb-10 transition-opacity duration-700">
-          <p className="text-xs uppercase tracking-wider text-red-300/70 font-semibold mb-3">
+          <p className="text-xs uppercase tracking-wider text-zinc-500 font-semibold mb-3">
             {new Date(post.date).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}
           </p>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{post.title}</h1>
@@ -58,7 +59,7 @@ export default async function BlogSlugPage(props: PageProps) {
           {post.tags && (
             <div className="flex flex-wrap gap-2 mt-4">
               {post.tags.map(tag => (
-                <span key={tag} className="text-[11px] px-2 py-1 rounded-full bg-red-500/15 text-red-300 border border-red-500/30">{tag}</span>
+                <span key={tag} className="text-[11px] px-2 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30">{tag}</span>
               ))}
             </div>
           )}

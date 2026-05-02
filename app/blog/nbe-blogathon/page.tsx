@@ -16,9 +16,10 @@ export default function NbeBlogathonPost() {
   const post = blogPosts.find(p=>p.slug==='nbe-blogathon');
   return (
     <div className="min-h-screen relative bg-black">
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.12),transparent_50%)] pointer-events-none z-0" />
       <div className="relative z-10 max-w-3xl mx-auto px-6 pt-24 pb-40">
         <motion.h1 className="text-4xl md:text-5xl font-bold text-white mb-6" initial={{opacity:0,y:30}} animate={{opacity:1,y:0}} transition={{duration:0.8}}>{post?.title}</motion.h1>
-        <motion.p className="text-xs uppercase tracking-wider text-red-300/70 font-semibold mb-6" initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.4}}>
+        <motion.p className="text-xs uppercase tracking-wider text-zinc-500 font-semibold mb-6" initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.4}}>
           {post ? new Date(post.date).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}) : ''} {post?.tags && '• ' + post.tags.join(' / ')}
         </motion.p>
   <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{duration:0.8,delay:0.2}} className="space-y-8 max-w-none text-[15px] leading-relaxed text-white/90 bg-black/40 rounded-xl p-6 border border-white/10 backdrop-blur-sm shadow-md">

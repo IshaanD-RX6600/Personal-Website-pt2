@@ -15,6 +15,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-black">
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.12),transparent_50%)] pointer-events-none z-0" />
       {/* Content */}
       <div className="relative z-10 flex items-center justify-center min-h-screen">
         <GlitchText

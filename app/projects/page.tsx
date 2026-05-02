@@ -87,15 +87,16 @@ export default function ProjectsPage() {
 
   return (
     <div className="min-h-screen relative bg-black">
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.12),transparent_50%)] pointer-events-none z-0" />
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center min-h-screen p-8 pt-20 pb-32">
-        <motion.h1 
-          className="text-5xl md:text-7xl font-bold text-white text-center mb-12"
+        <motion.h1
+          className="text-5xl md:text-7xl font-bold text-center mb-12"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          Projects
+          <span className="bg-gradient-to-r from-purple-400 via-violet-400 to-indigo-400 bg-clip-text text-transparent">Projects</span>
         </motion.h1>
         
         {/* Project Cards */}
@@ -106,7 +107,7 @@ export default function ProjectsPage() {
           transition={{ duration: 0.8, delay: 0.4 }}
         >
           {projects.map((project, index) => {
-            const colors = ['#00ffff', '#8b5cf6', '#ec4899', '#10b981', '#f97316', '#3b82f6'];
+            const colors = ['#a855f7', '#8b5cf6', '#6366f1', '#3b82f6', '#06b6d4', '#7c3aed'];
             const speeds = ['4s', '5s', '6s', '7s', '5.5s', '4.5s'];
             
             return (
@@ -121,7 +122,7 @@ export default function ProjectsPage() {
                   speed={speeds[index % speeds.length]}
                   className="w-full"
                 >
-                <div className="bg-black/30 backdrop-blur-sm border border-white/20 rounded-lg overflow-hidden hover:bg-black/50 hover:border-white/40 hover:scale-105 transition-all duration-300 transform cursor-pointer group">
+                <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden hover:border-purple-500/40 hover:bg-white/[0.06] transition-all duration-300 cursor-pointer group">
                   {/* Project Image */}
                   <div className="w-full h-48 bg-gray-800/50 flex items-center justify-center overflow-hidden">
                     {project.image === "coming-soon" ? (
@@ -144,15 +145,15 @@ export default function ProjectsPage() {
                   </div>
                   {/* Project Content */}
                   <div className="p-6">
-                    <h3 className="text-xl font-bold text-white mb-3 group-hover:text-blue-300 transition-colors duration-300">{project.title}</h3>
-                    <p className="text-gray-300 mb-4 text-sm group-hover:text-gray-200 transition-colors duration-300">{project.description}</p>
+                    <h3 className="text-xl font-bold text-white mb-3 group-hover:text-purple-300 transition-colors duration-300">{project.title}</h3>
+                    <p className="text-zinc-300 mb-4 text-sm group-hover:text-zinc-200 transition-colors duration-300">{project.description}</p>
                     <div className="flex gap-3">
                       {project.liveUrl && (
                         <a
                           href={project.liveUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-2 px-3 py-2 bg-blue-600/80 text-white rounded-md hover:bg-blue-700 hover:scale-105 transition-all duration-300 text-sm shadow-lg hover:shadow-blue-500/50"
+                          className="flex items-center gap-2 px-3 py-2 bg-purple-500/20 border border-purple-500/30 text-purple-300 rounded-xl hover:bg-purple-500/30 hover:text-white transition-all duration-300 text-sm"
                         >
                           <VscLinkExternal size={14} />
                           {project.liveUrl.includes('youtube.com') ? 'Demo Video' : 'Website Link'}
@@ -162,7 +163,7 @@ export default function ProjectsPage() {
                         href={project.githubUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-3 py-2 bg-gray-600/80 text-white rounded-md hover:bg-gray-700 hover:scale-105 transition-all duration-300 text-sm shadow-lg hover:shadow-gray-500/50"
+                        className="flex items-center gap-2 px-3 py-2 bg-white/[0.04] border border-white/10 text-zinc-300 rounded-xl hover:border-white/20 hover:text-white transition-all duration-300 text-sm"
                       >
                         <VscGithub size={14} />
                         GitHub
@@ -187,7 +188,7 @@ export default function ProjectsPage() {
             href="https://github.com/IshaanD-RX6600"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-8 py-4 bg-gray-800/80 backdrop-blur-sm border border-white/30 text-white rounded-lg hover:bg-gray-700/80 hover:border-white/50 hover:scale-105 transition-all duration-300 text-lg font-semibold shadow-lg hover:shadow-gray-500/50"
+            className="flex items-center gap-3 px-8 py-4 bg-white/[0.03] backdrop-blur-xl border border-white/10 text-white rounded-2xl hover:border-purple-500/40 hover:bg-white/[0.06] transition-all duration-300 text-lg font-semibold"
           >
             <VscGithub size={20} />
             See More on GitHub
