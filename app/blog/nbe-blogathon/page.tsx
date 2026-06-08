@@ -15,16 +15,17 @@ export default function NbeBlogathonPost() {
   ];
   const post = blogPosts.find(p=>p.slug==='nbe-blogathon');
   return (
-    <div className="min-h-screen relative bg-black">
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.12),transparent_50%)] pointer-events-none z-0" />
+    <div className="min-h-screen relative blueprint-bg">
+      <div className="fixed inset-0 pointer-events-none z-0"
+        style={{ background: 'radial-gradient(ellipse at top, rgba(0,180,216,0.05), transparent 60%)' }} />
       <div className="relative z-10 max-w-3xl mx-auto px-6 pt-24 pb-40">
         <motion.h1 className="text-4xl md:text-5xl font-bold text-white mb-6" initial={{opacity:0,y:30}} animate={{opacity:1,y:0}} transition={{duration:0.8}}>{post?.title}</motion.h1>
-        <motion.p className="text-xs uppercase tracking-wider text-zinc-500 font-semibold mb-6" initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.4}}>
-          {post ? new Date(post.date).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}) : ''} {post?.tags && '• ' + post.tags.join(' / ')}
+        <motion.p className="bp-annotation opacity-65 mb-6" initial={{opacity:0}} animate={{opacity:1}} transition={{delay:0.4}}>
+          {post ? new Date(post.date).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}) : ''} {post?.tags && '∥ ' + post.tags.join(' / ')}
         </motion.p>
-  <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{duration:0.8,delay:0.2}} className="space-y-8 max-w-none text-[15px] leading-relaxed text-white/90 bg-black/40 rounded-xl p-6 border border-white/10 backdrop-blur-sm shadow-md">
+  <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{duration:0.8,delay:0.2}} className="bp-card space-y-8 max-w-none text-[15px] leading-relaxed text-white/90 p-6 shadow-md">
           {post?.image && (
-            <figure className="mx-auto w-full max-w-xl rounded-2xl overflow-hidden border border-white/15 bg-white/5 backdrop-blur-sm shadow-lg">
+            <figure className="mx-auto w-full max-w-xl overflow-hidden border" style={{ borderColor: 'rgba(0,180,216,0.25)' }}>
               <div className="relative aspect-[3/5] w-full">
                 <Image
                   src={post.image}
@@ -49,7 +50,7 @@ export default function NbeBlogathonPost() {
           <p>While constructing the identity keychain, I noticed how each value connects to the next: calmness leads to honesty, honesty really shapes connection, connection sparks positivity, positivity builds trust, trust fuels passion, and passion is balanced by life's highs and lows.</p>
           <p>This keychain also reminds me that my identity isn’t just one singular thing. It is layered through my roles as a student, athlete, coach, family member, and community member. Each part intersects to shape who I am just like how each bead is connected by the same thread.</p>
           {post?.videoUrl && (
-            <div className="aspect-video w-full rounded-xl overflow-hidden border border-white/10 bg-black/40">
+            <div className="aspect-video w-full overflow-hidden border" style={{ borderColor: 'rgba(0,180,216,0.25)', backgroundColor: 'rgba(5,14,28,0.8)' }}>
               <iframe
                 src={post.videoUrl.replace('watch?v=','embed/')}
                 title="YouTube video"

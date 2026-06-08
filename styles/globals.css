@@ -8,75 +8,78 @@
   }
 }
 
+/* ─────────────────────────────────────────────────────────
+   ENGINEERING BLUEPRINT — CSS VARIABLES (navy/cyan theme)
+   ───────────────────────────────────────────────────────── */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
+    --background: 215 62% 10%;
+    --foreground: 200 50% 94%;
+    --card: 215 62% 7%;
+    --card-foreground: 200 50% 94%;
+    --popover: 215 62% 7%;
+    --popover-foreground: 200 50% 94%;
+    --primary: 194 100% 42%;
+    --primary-foreground: 215 62% 10%;
+    --secondary: 215 55% 15%;
+    --secondary-foreground: 200 40% 88%;
+    --muted: 215 55% 15%;
+    --muted-foreground: 200 25% 52%;
+    --accent: 190 100% 38%;
+    --accent-foreground: 215 62% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 194 55% 28%;
+    --input: 215 55% 15%;
+    --ring: 194 100% 42%;
+    --chart-1: 194 100% 42%;
+    --chart-2: 200 80% 65%;
+    --chart-3: 215 55% 55%;
+    --chart-4: 185 100% 55%;
+    --chart-5: 210 75% 65%;
+    --radius: 0.125rem;
+    --sidebar-background: 215 62% 7%;
+    --sidebar-foreground: 200 50% 94%;
+    --sidebar-primary: 194 100% 42%;
+    --sidebar-primary-foreground: 215 62% 10%;
+    --sidebar-accent: 215 55% 13%;
+    --sidebar-accent-foreground: 200 40% 88%;
+    --sidebar-border: 194 55% 25%;
+    --sidebar-ring: 194 100% 42%;
   }
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
+    --background: 215 62% 10%;
+    --foreground: 200 50% 94%;
+    --card: 215 62% 7%;
+    --card-foreground: 200 50% 94%;
+    --popover: 215 62% 7%;
+    --popover-foreground: 200 50% 94%;
+    --primary: 194 100% 42%;
+    --primary-foreground: 215 62% 10%;
+    --secondary: 215 55% 15%;
+    --secondary-foreground: 200 40% 88%;
+    --muted: 215 55% 15%;
+    --muted-foreground: 200 25% 52%;
+    --accent: 190 100% 38%;
+    --accent-foreground: 215 62% 10%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 194 55% 28%;
+    --input: 215 55% 15%;
+    --ring: 194 100% 42%;
+    --chart-1: 194 100% 42%;
+    --chart-2: 200 80% 65%;
+    --chart-3: 215 55% 55%;
+    --chart-4: 185 100% 55%;
+    --chart-5: 210 75% 65%;
+    --sidebar-background: 215 62% 7%;
+    --sidebar-foreground: 200 50% 94%;
+    --sidebar-primary: 194 100% 42%;
+    --sidebar-primary-foreground: 215 62% 10%;
+    --sidebar-accent: 215 55% 13%;
+    --sidebar-accent-foreground: 200 40% 88%;
+    --sidebar-border: 194 55% 25%;
+    --sidebar-ring: 194 100% 42%;
   }
 }
 
@@ -87,4 +90,221 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* ─────────────────────────────────────────────────────────
+   ENGINEERING BLUEPRINT — COMPONENT UTILITY CLASSES
+   ───────────────────────────────────────────────────────── */
+@layer components {
+
+  /* Grid paper background — large 100px grid + small 20px sub-grid */
+  .blueprint-bg {
+    background-color: #0a1628;
+    background-image:
+      linear-gradient(rgba(0, 180, 216, 0.12) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 180, 216, 0.12) 1px, transparent 1px),
+      linear-gradient(rgba(0, 180, 216, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 180, 216, 0.045) 1px, transparent 1px);
+    background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+    background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
+  }
+
+  /* Schematic card — corner bracket decorators top-left and bottom-right */
+  .bp-card {
+    position: relative;
+    background-color: rgba(5, 14, 28, 0.82);
+    border: 1px solid rgba(0, 180, 216, 0.28);
+    backdrop-filter: blur(14px);
+    transition: border-color 0.25s ease, background-color 0.25s ease;
+  }
+
+  .bp-card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: 14px;
+    height: 14px;
+    border-top: 2px solid #00b4d8;
+    border-left: 2px solid #00b4d8;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .bp-card::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 14px;
+    height: 14px;
+    border-bottom: 2px solid #00b4d8;
+    border-right: 2px solid #00b4d8;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .bp-card:hover {
+    border-color: rgba(0, 180, 216, 0.55);
+    background-color: rgba(0, 25, 50, 0.88);
+  }
+
+  /* Callout / section label — monospace uppercase in a cyan box */
+  .bp-label {
+    display: inline-flex;
+    align-items: center;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #00b4d8;
+    border: 1px solid rgba(0, 180, 216, 0.45);
+    background: rgba(0, 180, 216, 0.07);
+    padding: 3px 10px;
+    white-space: nowrap;
+  }
+
+  /* Small technical annotation text — for corner stamps, dimension labels */
+  .bp-annotation {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.595rem;
+    font-weight: 500;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: rgba(0, 180, 216, 0.55);
+    line-height: 1.65;
+  }
+
+  /* Dimension line — horizontal with vertical end ticks */
+  .bp-dim-line {
+    position: relative;
+    height: 1px;
+    background: rgba(0, 180, 216, 0.35);
+  }
+
+  .bp-dim-line::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: -4px;
+    width: 1px;
+    height: 9px;
+    background: rgba(0, 180, 216, 0.6);
+  }
+
+  .bp-dim-line::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -4px;
+    width: 1px;
+    height: 9px;
+    background: rgba(0, 180, 216, 0.6);
+  }
+
+  /* Small blueprint badge / tag */
+  .bp-tag {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: #00b4d8;
+    border: 1px solid rgba(0, 180, 216, 0.38);
+    background: rgba(0, 180, 216, 0.07);
+    padding: 2px 7px;
+    white-space: nowrap;
+  }
+
+  /* Input field — technical spec style */
+  .bp-input {
+    background-color: rgba(5, 14, 28, 0.7);
+    border: 1px solid rgba(0, 180, 216, 0.3);
+    color: #ddf2ff;
+    font-family: 'Courier New', Courier, monospace;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .bp-input::placeholder {
+    color: rgba(0, 180, 216, 0.32);
+    font-size: 0.85em;
+    letter-spacing: 0.05em;
+  }
+
+  .bp-input:focus {
+    outline: none;
+    border-color: rgba(0, 180, 216, 0.7);
+    box-shadow: 0 0 0 1px rgba(0, 180, 216, 0.18), inset 0 0 12px rgba(0, 180, 216, 0.04);
+  }
+
+  /* Blueprint action button */
+  .bp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: transparent;
+    border: 1px solid rgba(0, 180, 216, 0.55);
+    color: #00b4d8;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .bp-btn:hover {
+    background-color: rgba(0, 180, 216, 0.12);
+    border-color: #00b4d8;
+    color: #ffffff;
+    box-shadow: 0 0 14px rgba(0, 180, 216, 0.22);
+  }
+
+  .bp-btn:active {
+    background-color: rgba(0, 180, 216, 0.2);
+  }
+
+  .bp-btn:disabled {
+    opacity: 0.38;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  /* Timeline / node glow dot */
+  .bp-dot {
+    background: #00b4d8;
+    box-shadow: 0 0 10px rgba(0, 180, 216, 0.55), 0 0 20px rgba(0, 180, 216, 0.18);
+  }
+
+  /* Navigation dock item button */
+  .dock-item {
+    background-color: rgba(0, 180, 216, 0.07);
+    border: 1px solid rgba(0, 180, 216, 0.2);
+    border-radius: 2px;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .dock-item:hover {
+    background-color: rgba(0, 180, 216, 0.18);
+    border-color: rgba(0, 180, 216, 0.55);
+    transform: scale(1.1);
+  }
+
+  /* Scrolling skill marquee */
+  .marquee-container {
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .marquee-content {
+    display: inline-flex;
+    animation: marquee-scroll 30s linear infinite;
+  }
+}
+
+@keyframes marquee-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }

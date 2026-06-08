@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { VscHome, VscArchive, VscAccount, VscSettingsGear, VscCode, VscBook } from "react-icons/vsc";
+import { VscHome, VscAccount, VscSettingsGear, VscCode, VscBook } from "react-icons/vsc";
 import SimpleDock from "@/components/SimpleDock";
 
 const dockItems = [
@@ -40,36 +40,93 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen relative bg-black">
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.12),transparent_50%)] pointer-events-none z-0" />
+    <div className="min-h-screen relative blueprint-bg">
+      {/* Radial glow */}
+      <div
+        className="fixed inset-0 pointer-events-none z-0"
+        style={{ background: 'radial-gradient(ellipse at top, rgba(0,180,216,0.06), transparent 60%)' }}
+      />
+
       <div className="relative z-10 flex flex-col items-center min-h-screen p-8 pt-20 pb-32">
-        <motion.h1
-          className="text-5xl md:text-7xl font-bold text-center mb-4"
+
+        {/* Page title */}
+        <motion.div
+          className="w-full max-w-xl mb-4"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <span className="bg-gradient-to-r from-purple-400 via-violet-400 to-indigo-400 bg-clip-text text-transparent">Contact</span>
-        </motion.h1>
+          <div className="flex items-center gap-4 mb-3">
+            <div
+              className="h-px flex-1"
+              style={{ background: 'linear-gradient(to right, transparent, rgba(0,180,216,0.4))' }}
+            />
+            <span className="bp-annotation opacity-60">MODULE: SIGNAL_TRANSMIT</span>
+            <div
+              className="h-px flex-1"
+              style={{ background: 'linear-gradient(to left, transparent, rgba(0,180,216,0.4))' }}
+            />
+          </div>
+          <h1 className="text-5xl md:text-7xl font-bold text-center text-white">Contact</h1>
+        </motion.div>
+
+        {/* Sub-description */}
         <motion.p
-          className="text-zinc-400 text-center mb-12"
+          className="mb-12 text-center bp-annotation opacity-70 text-[0.7rem]"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          Have a question or want to work together? Send me a message!
+          HAVE A QUESTION OR WANT TO WORK TOGETHER? TRANSMIT A MESSAGE.
         </motion.p>
 
-        <motion.form
-          onSubmit={handleSubmit}
-          className="w-full max-w-xl space-y-6 bg-white/[0.03] border border-white/10 backdrop-blur-xl rounded-2xl p-8"
+        {/* Form panel */}
+        <motion.div
+          className="w-full max-w-xl"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
         >
+          {/* Title block — schematic drawing header */}
+          <div
+            className="px-5 py-3 flex items-center justify-between mb-0"
+            style={{
+              backgroundColor: 'rgba(0,180,216,0.07)',
+              border: '1px solid rgba(0,180,216,0.35)',
+              borderBottom: 'none',
+            }}
+          >
+            <span className="bp-label">Communication Interface</span>
+            <span className="bp-annotation opacity-60">FORM-001</span>
+          </div>
+
+          {/* Form container */}
+          <form
+            onSubmit={handleSubmit}
+            className="w-full space-y-6 p-8"
+            style={{
+              backgroundColor: 'rgba(5,14,28,0.82)',
+              border: '1px solid rgba(0,180,216,0.28)',
+              backdropFilter: 'blur(14px)',
+              position: 'relative',
+            }}
+          >
+            {/* Bottom-right corner bracket */}
+            <div
+              className="absolute bottom-0 right-0 w-5 h-5 pointer-events-none"
+              style={{
+                borderBottom: '2px solid #00b4d8',
+                borderRight: '2px solid #00b4d8',
+              }}
+            />
+
+            {/* Name field */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-zinc-300 mb-2">
-                Name
+              <label
+                htmlFor="name"
+                className="block mb-2 bp-annotation opacity-85 font-semibold"
+              >
+                FIELD_01: SENDER_NAME
               </label>
               <input
                 type="text"
@@ -77,14 +134,18 @@ export default function ContactPage() {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
-                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                placeholder="Your name"
+                className="bp-input w-full px-4 py-3"
+                placeholder="your name"
               />
             </div>
 
+            {/* Email field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-zinc-300 mb-2">
-                Email
+              <label
+                htmlFor="email"
+                className="block mb-2 bp-annotation opacity-85 font-semibold"
+              >
+                FIELD_02: SENDER_EMAIL
               </label>
               <input
                 type="email"
@@ -92,14 +153,18 @@ export default function ContactPage() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
-                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="bp-input w-full px-4 py-3"
                 placeholder="your@email.com"
               />
             </div>
 
+            {/* Message field */}
             <div>
-              <label htmlFor="message" className="block text-sm font-medium text-zinc-300 mb-2">
-                Message
+              <label
+                htmlFor="message"
+                className="block mb-2 bp-annotation opacity-85 font-semibold"
+              >
+                FIELD_03: MESSAGE_PAYLOAD
               </label>
               <textarea
                 id="message"
@@ -107,28 +172,34 @@ export default function ContactPage() {
                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                 required
                 rows={5}
-                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
-                placeholder="Your message..."
+                className="bp-input w-full px-4 py-3 resize-none"
+                placeholder="your message..."
               />
             </div>
 
+            {/* Divider line with ticks */}
+            <div className="bp-dim-line" />
+
+            {/* Submit button */}
             <motion.button
               type="submit"
               disabled={status === "loading"}
-              className="w-full py-3 px-6 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-lg shadow-lg hover:from-purple-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-black disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="bp-btn w-full py-3 px-6 text-sm"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              {status === "loading" ? "Sending..." : "Send Message"}
+              {status === "loading" ? "Transmitting..." : "Transmit Message"}
             </motion.button>
 
+            {/* Status messages */}
             {status === "success" && (
               <motion.p
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-center text-green-400"
+                className="text-center font-mono text-xs tracking-widest uppercase"
+                style={{ color: '#00b4d8' }}
               >
-                Message sent successfully!
+                ✓ Signal received successfully.
               </motion.p>
             )}
 
@@ -136,13 +207,21 @@ export default function ContactPage() {
               <motion.p
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-center text-red-400"
+                className="text-center font-mono text-xs tracking-widest uppercase text-red-400"
               >
-                Failed to send message. Please try again.
+                ✗ Transmission failed. Please retry.
               </motion.p>
             )}
-          </motion.form>
-        </div>
+          </form>
+
+          {/* Footer annotation */}
+          <div className="mt-3 flex items-center justify-between">
+            <span className="bp-annotation opacity-40">DEST: ishaandhiman74@gmail.com</span>
+            <span className="bp-annotation opacity-40">PORT-A005</span>
+          </div>
+        </motion.div>
+      </div>
+
       <SimpleDock items={dockItems} />
     </div>
   );

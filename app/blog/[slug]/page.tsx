@@ -47,24 +47,26 @@ export default async function BlogSlugPage(props: PageProps) {
   ];
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-black">
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.12),transparent_50%)] pointer-events-none z-0" />
+    <div className="min-h-screen relative overflow-hidden blueprint-bg">
+      <div className="fixed inset-0 pointer-events-none z-0"
+        style={{ background: 'radial-gradient(ellipse at top, rgba(0,180,216,0.05), transparent 60%)' }} />
       <div className="relative z-10 max-w-3xl mx-auto px-6 pt-24 pb-40">
         <div className="mb-10 transition-opacity duration-700">
-          <p className="text-xs uppercase tracking-wider text-zinc-500 font-semibold mb-3">
+          <p className="bp-annotation opacity-65 mb-3">
             {new Date(post.date).toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'})}
           </p>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{post.title}</h1>
-          <p className="text-gray-300 text-base leading-relaxed max-w-2xl">{post.excerpt}</p>
+          <p className="text-base leading-relaxed max-w-2xl" style={{ color: 'rgba(180,220,240,0.75)' }}>{post.excerpt}</p>
           {post.tags && (
             <div className="flex flex-wrap gap-2 mt-4">
               {post.tags.map(tag => (
-                <span key={tag} className="text-[11px] px-2 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30">{tag}</span>
+                <span key={tag} className="bp-tag">{tag}</span>
               ))}
             </div>
           )}
           {post.image && (
-            <div className="w-full mt-8 rounded-xl border border-white/10 bg-black/30 overflow-hidden">
+            <div className="w-full mt-8 border overflow-hidden"
+              style={{ borderColor: 'rgba(0,180,216,0.25)', backgroundColor: 'rgba(5,14,28,0.7)' }}>
               <BlogHeroImage
                 src={post.image}
                 alt={post.title}
@@ -86,7 +88,7 @@ export default async function BlogSlugPage(props: PageProps) {
         <p>While constructing the identity keychain, I noticed how each value connects to the next: calmness leads to honesty, honesty really shapes connection, connection sparks positivity, positivity builds trust, trust fuels passion, and passion is balanced by life's highs and lows.</p>
         <p>This keychain also reminds me that my identity isn’t just one singular thing. It is layered through my roles as a student, athlete, coach, family member, and community member. Each part intersects to shape who I am just like how each bead is connected by the same thread.</p>
         {post.videoUrl && (
-          <div className="aspect-video w-full rounded-xl overflow-hidden border border-white/10 bg-black/40">
+          <div className="aspect-video w-full overflow-hidden border" style={{ borderColor: 'rgba(0,180,216,0.25)', backgroundColor: 'rgba(5,14,28,0.8)' }}>
             <iframe
               src={post.videoUrl.replace('watch?v=','embed/')}
               title="YouTube video"
@@ -97,8 +99,8 @@ export default async function BlogSlugPage(props: PageProps) {
           </div>
         )}
         <div className="pt-4">
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent my-4" />
-          <h2 className="text-xs tracking-widest font-semibold text-white/60 mb-3 uppercase">Works Cited</h2>
+          <div className="h-px w-full my-4" style={{ background: 'linear-gradient(to right, transparent, rgba(0,180,216,0.3), transparent)' }} />
+          <h2 className="bp-annotation opacity-75 mb-3">Works Cited</h2>
           <ol className="list-decimal list-inside space-y-2 text-white/70 text-[13px] leading-relaxed">
             <li>&ldquo;Are Black &amp; White Colors?&rdquo; <em>Color Matters</em>, <a className="underline decoration-dotted hover:text-white" href="https://www.colormatters.com/color-and-design/are-black-and-white-colors" target="_blank" rel="noopener noreferrer">https://www.colormatters.com/color-and-design/are-black-and-white-colors</a>. Accessed 6 Oct. 2025.</li>
             <li>&ldquo;BLUE Definition &amp; Meaning.&rdquo; <em>Merriam-Webster</em>, <a className="underline decoration-dotted hover:text-white" href="https://www.merriam-webster.com/dictionary/blue" target="_blank" rel="noopener noreferrer">https://www.merriam-webster.com/dictionary/blue</a>. Accessed 6 Oct. 2025.</li>
@@ -139,7 +141,7 @@ export default async function BlogSlugPage(props: PageProps) {
 
         <p>In light of the above, I learned that balance is not found; balance is built; balance is lived. Losing my grandfather threw my Medicine Wheel in a lopsided direction, but it also taught me that healing takes patience, reflection and connection. By steadily regaining control of my physical, emotional, and spiritual well-being, I began to fathom that grief really does not mean losing someone, it means learning to carry their memory in a different manner. My grandfather's wisdom continues to be my compass in my day-to-day life.</p>
 
-        <div className="w-full mt-8 rounded-xl border border-white/10 bg-black/30 overflow-hidden">
+        <div className="w-full mt-8 overflow-hidden border" style={{ borderColor: 'rgba(0,180,216,0.25)', backgroundColor: 'rgba(5,14,28,0.7)' }}>
           <img
             src="/Medicine-Wheel-1.webp"
             alt="Medicine Wheel diagram showing the four quadrants representing Mental, Emotional, Physical, and Spiritual aspects of life"
@@ -147,7 +149,7 @@ export default async function BlogSlugPage(props: PageProps) {
           />
         </div>
 
-        <div className="aspect-video w-full rounded-xl overflow-hidden border border-white/10 bg-black/40 mt-8">
+        <div className="aspect-video w-full overflow-hidden border mt-8" style={{ borderColor: 'rgba(0,180,216,0.25)', backgroundColor: 'rgba(5,14,28,0.8)' }}>
           <iframe
             src="https://www.youtube.com/embed/S7nb4rJ_N14"
             title="YouTube video"
@@ -158,7 +160,7 @@ export default async function BlogSlugPage(props: PageProps) {
         </div>
 
         <div className="pt-8">
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent my-6" />
+          <div className="h-px w-full my-6" style={{ background: 'linear-gradient(to right, transparent, rgba(0,180,216,0.3), transparent)' }} />
           <h2 className="text-xl font-semibold text-white mb-6">Works Cited</h2>
           <div className="text-white/70 text-sm leading-relaxed space-y-3">
             <p>Anderson, Amy Rees. "The Importance Of Having Balance In Our Lives." <em>Forbes</em>, 31 May 2016, <a className="underline decoration-dotted hover:text-white" href="https://www.forbes.com/sites/amyanderson/2016/05/31/the-importance-of-having-balance-in-our-lives/" target="_blank" rel="noopener noreferrer">https://www.forbes.com/sites/amyanderson/2016/05/31/the-importance-of-having-balance-in-our-lives/</a>. Accessed 25 October 2025.</p>
@@ -201,7 +203,7 @@ export default async function BlogSlugPage(props: PageProps) {
         <p>In light of the above, the Kushtaka, or Land-Otter Man, is more than just a terrifying creature in Tlingit folklore. Its shape-shifting abilities, predatory instincts, and connection to the spiritual world and the world around us show us mere mortals the deep cultural lessons about respect, caution, and assessing and understanding the environment around us. Through traditional storytelling, legends like the Sitka tale, and modern interpretations such as Cameron Currin’s film, the Kushtaka continues to captivate audiences. By digging deeper into the past of this creature, we gain knowledge and information about the Tlingit worldview, where the boundary of the things that are seen and unseen is fluid, and where stories serve as lore and important moral guidance.</p>
 
         {post.videoUrl && (
-          <div className="aspect-video w-full rounded-xl overflow-hidden border border-white/10 bg-black/40">
+          <div className="aspect-video w-full overflow-hidden border" style={{ borderColor: 'rgba(0,180,216,0.25)', backgroundColor: 'rgba(5,14,28,0.8)' }}>
             <iframe
               src={post.videoUrl.replace('watch?v=','embed/')}
               title="YouTube video"
@@ -213,7 +215,7 @@ export default async function BlogSlugPage(props: PageProps) {
         )}
 
         <div className="pt-8">
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent my-6" />
+          <div className="h-px w-full my-6" style={{ background: 'linear-gradient(to right, transparent, rgba(0,180,216,0.3), transparent)' }} />
           <h2 className="text-xl font-semibold text-white mb-4">Source Analysis</h2>
           <div className="text-white/70 text-sm leading-relaxed space-y-4">
             <div>
@@ -243,7 +245,7 @@ export default async function BlogSlugPage(props: PageProps) {
         </div>
 
         <div className="pt-8">
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-white/20 to-transparent my-6" />
+          <div className="h-px w-full my-6" style={{ background: 'linear-gradient(to right, transparent, rgba(0,180,216,0.3), transparent)' }} />
           <h2 className="text-xl font-semibold text-white mb-6">Works Cited</h2>
           <div className="text-white/70 text-sm leading-relaxed space-y-3">
             <p>Barnwell, Jack. “The Kodiak Coastie who created 'Kushtaka,' the horror that is Land-Otter Man.” <em>Navy Times</em>, 12 January 2019, <a className="underline decoration-dotted hover:text-white" href="https://www.navytimes.com/news/your-navy/2019/01/13/the-kodiak-coastie-who-created-kushtaka-the-horror-that-is-land-otter-man/" target="_blank" rel="noopener noreferrer">https://www.navytimes.com/news/your-navy/2019/01/13/the-kodiak-coastie-who-created-kushtaka-the-horror-that-is-land-otter-man/</a>. Accessed 10 November 2025.</p>
