@@ -5,7 +5,7 @@ import SimpleDock from "@/components/SimpleDock";
 import GlitchText from "@/components/GlitchText";
 import { VscHome, VscAccount, VscSettingsGear, VscCode, VscBook } from "react-icons/vsc";
 
-const CarModel = dynamic(() => import('@/components/CarModel'), { ssr: false });
+const CarModel = dynamic(() => import('@/components/CarModel'), { ssr: false, loading: () => null });
 
 export default function HomePage() {
   const dockItems = [
