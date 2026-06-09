@@ -3,7 +3,6 @@ import type { Metadata } from "next"
 import { Inter, Poppins } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import Chatbot from "@/components/Chatbot"
 
 const inter = Inter({ subsets: ["latin"], display: "swap" })
 const poppins = Poppins({ weight: ["700", "900"], subsets: ["latin"], display: "swap", variable: "--font-poppins" })
@@ -25,7 +24,6 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           {children}
-          <Chatbot />
         </ThemeProvider>
       </body>
     </html>

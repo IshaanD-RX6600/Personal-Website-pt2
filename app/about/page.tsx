@@ -157,7 +157,7 @@ export default function AboutPage() {
         style={{ background: 'radial-gradient(ellipse at top, rgba(0,180,216,0.05), transparent 60%)' }}
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 pb-32">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 pb-32">
 
         {/* ===== HERO ===== */}
         <motion.section {...fadeUp} transition={{ duration: 0.8 }}>
@@ -178,7 +178,7 @@ export default function AboutPage() {
                 Available for opportunities
               </span>
 
-              <h1 className="text-6xl md:text-8xl font-black tracking-tight leading-none mb-4">
+              <h1 className="text-4xl sm:text-6xl md:text-8xl font-black tracking-tight leading-none mb-4">
                 <span className="text-white">Ishaan </span>
                 <span style={{ color: '#00b4d8' }}>Dhiman</span>
               </h1>
@@ -218,27 +218,27 @@ export default function AboutPage() {
             </div>
 
             {/* Schematic avatar */}
-            <div className="relative flex items-center justify-center">
+            <div className="relative flex items-center justify-center py-10 lg:py-0">
               <motion.div
-                className="absolute w-80 h-80 rounded-full"
+                className="absolute w-52 h-52 sm:w-72 sm:h-72 lg:w-80 lg:h-80 rounded-full"
                 style={{ border: '1px dashed rgba(0,180,216,0.28)' }}
                 animate={{ rotate: 360 }}
                 transition={{ duration: 24, repeat: Infinity, ease: "linear" }}
               />
               <motion.div
-                className="absolute w-72 h-72 rounded-full"
+                className="absolute w-44 h-44 sm:w-64 sm:h-64 lg:w-72 lg:h-72 rounded-full"
                 style={{ border: '1px dashed rgba(0,180,216,0.14)' }}
                 animate={{ rotate: -360 }}
                 transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
               />
               <div
-                className="w-64 h-64 rounded-full flex items-center justify-center"
+                className="w-36 h-36 sm:w-52 sm:h-52 lg:w-64 lg:h-64 rounded-full flex items-center justify-center"
                 style={{
                   border: '1px solid rgba(0,180,216,0.28)',
                   background: 'linear-gradient(135deg, rgba(0,180,216,0.1), rgba(0,100,180,0.08))',
                 }}
               >
-                <span className="text-7xl font-black select-none" style={{ color: '#00b4d8' }}>ID</span>
+                <span className="text-5xl sm:text-7xl font-black select-none" style={{ color: '#00b4d8' }}>ID</span>
               </div>
               <div className="absolute -bottom-8 left-1/2 -translate-x-1/2">
                 <span className="bp-annotation opacity-55">ENTITY: ISHAAN_DHIMAN</span>

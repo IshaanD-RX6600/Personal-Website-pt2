@@ -21,7 +21,7 @@ export default function BlogPage() {
         style={{ background: 'radial-gradient(ellipse at top, rgba(0,180,216,0.05), transparent 60%)' }}
       />
 
-      <div className="relative z-10 flex flex-col items-center min-h-screen p-8 pt-20 pb-32">
+      <div className="relative z-10 flex flex-col items-center min-h-screen p-4 sm:p-8 pt-16 sm:pt-20 pb-32">
 
         {/* Page header */}
         <motion.div

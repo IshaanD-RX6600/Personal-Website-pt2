@@ -8,7 +8,7 @@ export default function SimpleDock({ items }: SimpleDockProps) {
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
       <div
-        className="flex items-center gap-3 px-3 py-2.5 shadow-2xl backdrop-blur-md"
+        className="flex items-center gap-1 sm:gap-3 px-2 sm:px-3 py-2.5 shadow-2xl backdrop-blur-md"
         style={{
           backgroundColor: 'rgba(5, 14, 28, 0.92)',
           border: '1px solid rgba(0, 180, 216, 0.45)',
@@ -51,7 +51,7 @@ export default function SimpleDock({ items }: SimpleDockProps) {
               <Link
                 key={i}
                 href={item.href}
-                className="relative group flex items-center justify-center w-11 h-11 dock-item"
+                className="relative group flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 dock-item"
                 title={item.label}
               >
                 {inner}
@@ -63,7 +63,7 @@ export default function SimpleDock({ items }: SimpleDockProps) {
               key={i}
               type="button"
               onClick={item.onClick}
-              className="relative group flex items-center justify-center w-11 h-11 dock-item"
+              className="relative group flex items-center justify-center w-9 h-9 sm:w-11 sm:h-11 dock-item"
               title={item.label}
             >
               {inner}
