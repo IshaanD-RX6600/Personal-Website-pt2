@@ -1,8 +1,11 @@
 "use client";
 
+import dynamic from 'next/dynamic';
 import SimpleDock from "@/components/SimpleDock";
 import GlitchText from "@/components/GlitchText";
 import { VscHome, VscAccount, VscSettingsGear, VscCode, VscBook } from "react-icons/vsc";
+
+const CarModel = dynamic(() => import('@/components/CarModel'), { ssr: false });
 
 export default function HomePage() {
   const dockItems = [
@@ -50,6 +53,18 @@ export default function HomePage() {
           <div>LAT: 43.4516°N</div>
           <div>LNG: 80.4925°W</div>
         </div>
+      </div>
+
+      {/* ── 3D Model — full-screen centered background ── */}
+      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 1 }}>
+        <CarModel />
+        {/* Vignette — dark edges, car visible in center-right */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse 70% 65% at 62% 52%, transparent 20%, rgba(10,22,40,0.65) 55%, #0a1628 88%)',
+          }}
+        />
       </div>
 
       {/* ── Content ── */}
