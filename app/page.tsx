@@ -19,13 +19,13 @@ export default function HomePage() {
   return (
     <div className="min-h-screen relative overflow-hidden blueprint-bg">
 
-      {/* ── 3D Model — hidden on mobile, full-screen on desktop ── */}
-      <div className="fixed inset-0 pointer-events-none hidden md:block" style={{ zIndex: 1 }}>
+      {/* ── 3D Model — full-screen background ── */}
+      <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 1 }}>
         <CarModel />
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'radial-gradient(ellipse 70% 65% at 62% 52%, transparent 20%, rgba(10,22,40,0.65) 55%, #0a1628 88%)',
+            background: 'radial-gradient(ellipse 80% 65% at 55% 52%, transparent 25%, rgba(10,22,40,0.6) 58%, #0a1628 88%)',
           }}
         />
       </div>

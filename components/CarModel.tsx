@@ -64,6 +64,7 @@ export default function CarModel() {
       <Canvas
         camera={{ position: [0, 0.4, 6], fov: 38 }}
         gl={{ alpha: true, antialias: true }}
+        dpr={[1, 1.5]}
         style={{ background: 'transparent', width: '100%', height: '100%' }}
         onCreated={() => setReady(true)}
       >
