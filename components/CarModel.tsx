@@ -22,18 +22,16 @@ function CarMesh() {
     const center = box2.getCenter(new THREE.Vector3());
     cloned.position.sub(center);
 
-    // Force all materials to be visible — strong cyan emissive so the car
-    // glows even in areas with no direct light hit
     cloned.traverse((obj) => {
       if ((obj as THREE.Mesh).isMesh) {
         const mesh = obj as THREE.Mesh;
         const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
         mats.forEach((m) => {
           if (m instanceof THREE.MeshStandardMaterial) {
-            m.emissive = new THREE.Color('#002233');
-            m.emissiveIntensity = 1.8;
-            m.roughness = 0.55;
-            m.metalness = 0.3;
+            m.emissive = new THREE.Color('#000000');
+            m.emissiveIntensity = 0;
+            m.roughness = 0.45;
+            m.metalness = 0.6;
             m.needsUpdate = true;
           }
         });
@@ -70,11 +68,11 @@ export default function CarModel() {
       >
         <Suspense fallback={null}>
           <Environment preset="warehouse" background={false} />
-          <ambientLight intensity={0.6} color="#003d5c" />
-          <spotLight position={[2, 7, 5]} angle={0.28} penumbra={0.9} intensity={3} color="#00d4f5" />
-          <spotLight position={[-4, 4, 4]} angle={0.4} penumbra={0.9} intensity={1.5} color="#0099cc" />
-          <spotLight position={[0, 5, -6]} angle={0.35} penumbra={0.8} intensity={1.5} color="#00aadd" />
-          <pointLight position={[0, -2, 0]} intensity={2} color="#00d4f5" distance={10} decay={2} />
+          <ambientLight intensity={0.9} color="#ffffff" />
+          <spotLight position={[2, 7, 5]} angle={0.28} penumbra={0.9} intensity={4} color="#ffffff" />
+          <spotLight position={[-4, 4, 4]} angle={0.4} penumbra={0.9} intensity={2} color="#fff5e0" />
+          <spotLight position={[0, 5, -6]} angle={0.35} penumbra={0.8} intensity={2} color="#ffffff" />
+          <pointLight position={[0, -2, 0]} intensity={1.5} color="#ffffff" distance={10} decay={2} />
           <CarMesh />
         </Suspense>
       </Canvas>
