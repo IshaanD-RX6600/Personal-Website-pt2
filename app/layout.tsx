@@ -4,7 +4,6 @@ import { Inter, Poppins } from "next/font/google"
 import "./globals.css"
 import "../styles/globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import HamburgerMenu from "@/components/HamburgerMenu"
 
 const inter = Inter({ subsets: ["latin"], display: "swap" })
 const poppins = Poppins({ weight: ["700", "900"], subsets: ["latin"], display: "swap", variable: "--font-poppins" })
@@ -29,7 +28,6 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
-          <HamburgerMenu />
           {children}
         </ThemeProvider>
       </body>

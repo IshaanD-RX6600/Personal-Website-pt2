@@ -308,3 +308,65 @@
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+
+/* ── 3D scene hotspot pins ─────────────────────────────────────────────── */
+.hs-anchor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.hs-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #00b4d8;
+  animation: hs-pulse 2s ease-in-out infinite;
+}
+
+@keyframes hs-pulse {
+  0%, 100% {
+    box-shadow: 0 0 6px 0 rgba(0,180,216,0.8), 0 0 18px 2px rgba(0,180,216,0.3);
+  }
+  50% {
+    box-shadow: 0 0 14px 4px rgba(0,180,216,1), 0 0 36px 8px rgba(0,180,216,0.5);
+  }
+}
+
+.hs-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 11px;
+  background: rgba(3, 8, 20, 0.88);
+  border: 1px solid rgba(0, 180, 216, 0.45);
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hs-anchor:hover .hs-chip {
+  border-color: rgba(0, 180, 216, 0.9);
+  box-shadow: 0 0 20px rgba(0, 180, 216, 0.3);
+}
+
+.hs-name {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #e4f2ff;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+
+.hs-sub {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 8px;
+  color: rgba(0, 180, 216, 0.62);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
