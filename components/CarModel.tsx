@@ -1,37 +1,35 @@
 "use client";
 
-import { Suspense, useRef, useMemo, useState } from 'react';
+import { Suspense, useEffect, useRef, useMemo, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useGLTF, Environment, Html, useProgress } from '@react-three/drei';
-import GearShifter, { GearShifterFallback } from './GearShifter';
+import { useGLTF, Environment, useProgress } from '@react-three/drei';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import GearShifter from './GearShifter';
 import * as THREE from 'three';
 
-// ─── Camera path waypoints ─────────────────────────────────────────────────
+// ─── Camera path waypoints — THE scroll choreography tuning surface ────────
+// p = normalized page scroll (0→1). Tune positions here, not in the rig.
+//
+//   0.00–0.20  exterior 3/4 hold — car auto-rotates to a stop, hero overlay
+//   0.20–0.50  fly-in: windshield approach, pass through glass — About overlay
+//   0.50–1.00  cockpit: settle, then push tight onto the gear shifter (nav)
 type WaypointEntry = { p: number; pos: [number,number,number]; look: [number,number,number]; fov: number };
-// Each entry: p=scroll progress (0→1), pos=camera position, look=look-at, fov
-const WP: WaypointEntry[] = [
-  // exterior 3/4 view — holds during auto-rotation phase
-  { p: 0.00, pos: [2.4,  1.05, 4.4],  look: [0,    0.28,  0],    fov: 42 },
-  { p: 0.15, pos: [2.4,  1.05, 4.4],  look: [0,    0.28,  0],    fov: 42 },
-  // dolly toward windshield
-  { p: 0.40, pos: [0.0,  0.84, 1.05], look: [0,    0.66,  0],    fov: 36 },
-  // through glass — land in driver seat
-  { p: 0.52, pos: [-0.14, 0.61, 0.0], look: [0.0,  0.56, -1.6],  fov: 76 },
-  // interior pan: steering wheel / instrument cluster → Projects
-  { p: 0.62, pos: [-0.14, 0.61, 0.0], look: [-0.3, 0.46, -1.0],  fov: 76 },
-  // infotainment → About
-  { p: 0.72, pos: [-0.14, 0.61, 0.0], look: [0.12, 0.38, -1.1],  fov: 76 },
-  // gear shifter → Skills
-  { p: 0.82, pos: [-0.14, 0.61, 0.0], look: [0.12, 0.28, -0.55], fov: 72 },
-  // rearview mirror → Experience
-  { p: 0.90, pos: [-0.14, 0.61, 0.0], look: [0.01, 0.70, -0.55], fov: 70 },
-  // passenger seat → Contact
-  { p: 1.00, pos: [-0.14, 0.61, 0.0], look: [0.55, 0.34, -0.80], fov: 68 },
+// Scene anatomy (normalized: car fits a 4-unit box, centered at origin):
+//   ground y=-0.48 · roof y≈+0.48 · nose +z · rear wing -z · driver side -x
+//   cabin: x∈[-0.7,0.7] y∈[-0.42,0.41] z∈[-0.48,1.03] · console top y≈-0.12
+export const WP: WaypointEntry[] = [
+  { p: 0.00, pos: [ 2.40, 1.05, 4.40], look: [ 0.00,  0.28, 0.00], fov: 42 }, // hero 3/4 view
+  { p: 0.20, pos: [ 2.40, 1.05, 4.40], look: [ 0.00,  0.28, 0.00], fov: 42 }, // hold (rotation stops here)
+  { p: 0.35, pos: [ 0.00, 0.35, 2.60], look: [ 0.00,  0.05, 0.50], fov: 40 }, // nose / windshield approach
+  { p: 0.50, pos: [-0.28, 0.12, 0.15], look: [ 0.00,  0.00, 1.00], fov: 70 }, // through glass → driver seat, dash view
+  // 0.62–1.00: driver's-seat POV — settle into the seat, then glance
+  // down-and-forward at the gate, windshield/dash beyond for context
+  { p: 0.62, pos: [-0.26, 0.13, 0.05], look: [ 0.05, -0.12, 0.30], fov: 60 }, // glance from the seat toward the console
+  { p: 0.80, pos: [-0.18, 0.17, -0.08], look: [ 0.05, -0.11, 0.20], fov: 54 }, // over the driver's knee, gate framed
+  { p: 1.00, pos: [-0.09, 0.12, -0.04], look: [ 0.05, -0.10, 0.21], fov: 50 }, // driver's glance at the shifter — nav mode
 ];
 
-// Navigation is now handled entirely by GearShifter — no separate hotspot pins.
-
-const GLB = '/2024_lbsilhouette_works_murcielago_gt_evo.glb';
+const GLB = '/car.glb';
 
 // ─── Waypoint interpolation (easeInOut between adjacent points) ────────────
 function samplePath(t: number) {
@@ -58,37 +56,62 @@ function samplePath(t: number) {
   };
 }
 
-// ─── Loader (shown via Html while GLB streams) ────────────────────────────
-function Loader() {
+// ─── Loader overlay — plain HTML, lives OUTSIDE the fading canvas wrapper ──
+// useProgress is a global store, so it works outside the Canvas too.
+function LoaderOverlay() {
   const { progress } = useProgress();
   return (
-    <Html center>
-      <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#00b4d8', letterSpacing: '0.15em', textAlign: 'center', userSelect: 'none' }}>
-        <div style={{ marginBottom: 8, textTransform: 'uppercase', opacity: 0.8 }}>Loading</div>
-        <div style={{ width: 120, height: 1, background: 'rgba(0,180,216,0.18)', position: 'relative' }}>
-          <div style={{ position: 'absolute', inset: 0, width: `${progress}%`, background: '#00b4d8', transition: 'width 0.2s ease' }} />
-        </div>
-        <div style={{ marginTop: 6, opacity: 0.4 }}>{Math.round(progress)}%</div>
+    <div style={{
+      position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
+      fontFamily: 'monospace', fontSize: 11, color: '#00b4d8', letterSpacing: '0.15em',
+      textAlign: 'center', userSelect: 'none', pointerEvents: 'none',
+    }}>
+      <div style={{ marginBottom: 8, textTransform: 'uppercase', opacity: 0.8 }}>Loading</div>
+      <div style={{ width: 120, height: 1, background: 'rgba(0,180,216,0.18)', position: 'relative' }}>
+        <div style={{ position: 'absolute', inset: 0, width: `${progress}%`, background: '#00b4d8', transition: 'width 0.2s ease' }} />
       </div>
-    </Html>
+      <div style={{ marginTop: 6, opacity: 0.4 }}>{Math.round(progress)}%</div>
+    </div>
   );
 }
 
+// Mounts only once Suspense resolves — i.e. the GLB is actually loaded.
+function ModelReady({ onReady }: { onReady: () => void }) {
+  useEffect(() => { onReady(); }, [onReady]);
+  return null;
+}
+
 // ─── Camera rig ───────────────────────────────────────────────────────────
+// Dev tuning: append ?cam=x,y,z&look=x,y,z&fov=50 to the URL to pin the
+// camera and find new waypoint coordinates without scrolling.
+function parseDebugCam() {
+  if (typeof window === 'undefined') return null;
+  const q = new URLSearchParams(window.location.search);
+  const cam = q.get('cam'), look = q.get('look');
+  if (!cam || !look) return null;
+  const v = (s: string) => s.split(',').map(Number) as [number, number, number];
+  return { pos: v(cam), look: v(look), fov: Number(q.get('fov') ?? 50) };
+}
+
 function CameraRig({ pRef }: { pRef: React.MutableRefObject<number> }) {
   const { camera } = useThree();
   const smoothPos  = useRef(new THREE.Vector3(2.4, 1.05, 4.4));
   const smoothLook = useRef(new THREE.Vector3(0, 0.28, 0));
+  const debug      = useMemo(parseDebugCam, []);
 
-  useFrame(() => {
-    const { pos, look, fov } = samplePath(pRef.current);
-    smoothPos.current.lerp(pos,   0.055);
-    smoothLook.current.lerp(look, 0.055);
+  useFrame((_, dt) => {
+    const { pos, look, fov } = debug
+      ? { pos: new THREE.Vector3(...debug.pos), look: new THREE.Vector3(...debug.look), fov: debug.fov }
+      : samplePath(pRef.current);
+    // Exponential damping — frame-rate independent (≈ lerp 0.055 @ 60fps)
+    const a = 1 - Math.exp(-3.5 * dt);
+    smoothPos.current.lerp(pos,   a);
+    smoothLook.current.lerp(look, a);
     camera.position.copy(smoothPos.current);
     camera.lookAt(smoothLook.current);
     const cam = camera as THREE.PerspectiveCamera;
     if (cam.isPerspectiveCamera) {
-      cam.fov = THREE.MathUtils.lerp(cam.fov, fov, 0.055);
+      cam.fov = THREE.MathUtils.lerp(cam.fov, fov, a);
       cam.updateProjectionMatrix();
     }
   });
@@ -101,6 +124,11 @@ function CarMesh({ pRef }: { pRef: React.MutableRefObject<number> }) {
   const { scene } = useGLTF(GLB);
   const groupRef  = useRef<THREE.Group>(null);
   const rotY      = useRef(0);
+  // Freeze rotation while tuning with the ?cam= debug camera
+  const frozen    = useMemo(
+    () => typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('cam'),
+    [],
+  );
 
   const model = useMemo(() => {
     const c = scene.clone(true);
@@ -128,9 +156,19 @@ function CarMesh({ pRef }: { pRef: React.MutableRefObject<number> }) {
 
   useFrame((_, dt) => {
     if (!groupRef.current) return;
-    // Auto-rotate eases to 0 by p=0.20
-    const speed = THREE.MathUtils.lerp(0.28, 0, Math.min(pRef.current / 0.20, 1));
-    rotY.current += dt * speed;
+    if (frozen) { groupRef.current.rotation.y = 0; return; }
+    const p = pRef.current;
+    if (p < 0.20) {
+      // Auto-rotate eases to 0 by p=0.20
+      const speed = THREE.MathUtils.lerp(0.28, 0, Math.min(p / 0.20, 1));
+      rotY.current += dt * speed;
+    } else {
+      // The interior waypoints (driver seat, gear shifter) are authored
+      // against the car's original orientation — settle the accumulated
+      // rotation onto the nearest full turn before the camera flies in.
+      const target = Math.round(rotY.current / (Math.PI * 2)) * Math.PI * 2;
+      rotY.current = THREE.MathUtils.damp(rotY.current, target, 2.5, dt);
+    }
     groupRef.current.rotation.y = rotY.current;
   });
 
@@ -144,9 +182,19 @@ function CarMesh({ pRef }: { pRef: React.MutableRefObject<number> }) {
 useGLTF.preload(GLB);
 
 // ─── Scene (inside Canvas context) ────────────────────────────────────────
-function Scene({ pRef, reducedMotion }: { pRef: React.MutableRefObject<number>; reducedMotion: boolean }) {
+function Scene({
+  pRef,
+  onNavScroll,
+  onModelReady,
+}: {
+  pRef:         React.MutableRefObject<number>;
+  onNavScroll:  (p: number) => void;
+  onModelReady: () => void;
+}) {
   return (
-    <Suspense fallback={<Loader />}>
+    <Suspense fallback={null}>
+      {/* Opaque background — EffectComposer + transparent canvas causes alpha fringing */}
+      <color attach="background" args={['#0a1628']} />
       <Environment preset="warehouse" background={false} />
 
       {/* Ambient rim light — cool blue tint */}
@@ -165,55 +213,51 @@ function Scene({ pRef, reducedMotion }: { pRef: React.MutableRefObject<number>; 
 
       <CameraRig pRef={pRef} />
       <CarMesh   pRef={pRef} />
-      <GearShifter pRef={pRef} reducedMotion={reducedMotion} />
+      <GearShifter pRef={pRef} onNavScroll={onNavScroll} />
+      <ModelReady onReady={onModelReady} />
+
+      {/* High threshold: only the emissive cyan accents (knob ring, gate dots) bloom */}
+      <EffectComposer multisampling={0}>
+        <Bloom intensity={0.35} luminanceThreshold={0.85} luminanceSmoothing={0.2} mipmapBlur />
+      </EffectComposer>
     </Suspense>
   );
 }
 
 // ─── Public export ────────────────────────────────────────────────────────
 export default function CarModel({
-  scrollProgress = 0,
-  reducedMotion  = false,
+  pRef,
+  onNavScroll,
 }: {
-  scrollProgress?: number;
-  reducedMotion?:  boolean;
+  pRef:        React.MutableRefObject<number>;
+  onNavScroll: (p: number) => void;
 }) {
+  // Flips when the GLB has actually loaded (not just when the GL context exists)
   const [ready, setReady] = useState(false);
-  const pRef = useRef<number>(0);
-  // Lock to 0 (exterior static view) when user prefers reduced motion
-  pRef.current = reducedMotion ? 0 : scrollProgress;
 
   return (
-    <div
-      style={{
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        opacity: ready ? 1 : 0,
-        transition: 'opacity 1.2s ease',
-      }}
-    >
-      <Canvas
-        camera={{ position: [2.4, 1.05, 4.4], fov: 42 }}
-        gl={{ antialias: true, alpha: true }}
-        dpr={[1, 1.5]}
-        style={{ background: 'transparent', width: '100%', height: '100%' }}
-        onCreated={() => setReady(true)}
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      {/* Canvas fades/scales in over 0.6s once the GLB has streamed in */}
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          opacity: ready ? 1 : 0,
+          transform: ready ? 'scale(1)' : 'scale(0.97)',
+          transition: 'opacity 0.6s ease, transform 0.6s ease',
+        }}
       >
-        <Scene pRef={pRef} reducedMotion={reducedMotion} />
-      </Canvas>
+        <Canvas
+          camera={{ position: [2.4, 1.05, 4.4], fov: 42 }}
+          gl={{ antialias: true, alpha: true }}
+          dpr={[1, 1.5]}
+          style={{ background: 'transparent', width: '100%', height: '100%' }}
+        >
+          <Scene pRef={pRef} onNavScroll={onNavScroll} onModelReady={() => setReady(true)} />
+        </Canvas>
+      </div>
 
-      {/* Flat SVG fallback — overlaid when animation is disabled */}
-      {reducedMotion && (
-        <div style={{
-          position: 'absolute',
-          top: '50%', left: '50%',
-          transform: 'translate(-50%,-50%)',
-          zIndex: 20,
-        }}>
-          <GearShifterFallback />
-        </div>
-      )}
+      {!ready && <LoaderOverlay />}
     </div>
   );
 }

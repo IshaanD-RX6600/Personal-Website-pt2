@@ -5,6 +5,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import type { ThreeEvent } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
+import { useSiteStore, type SectionId } from '@/stores/useSiteStore';
 
 // ─── Gate geometry constants ─────────────────────────────────────────────────
 // All positions are LOCAL offsets from GATE_CENTER (applied as: world = center + local)
@@ -15,41 +16,66 @@ const SNAP_THRESH = SLOT * 0.88;
 const SPRING_K    = 200;
 const DAMPING     = 26;
 
-// Center of the gate in world space — matches the camera's look-at for p=0.82
-// Adjust these if your specific GLB positions the center console differently
-const GATE_CENTER = new THREE.Vector3(0.14, 0.264, -0.48);
+// ─── Gate frame: where the assembly mounts on the car ────────────────────────
+// The whole shifter (plate + knob + labels) lives inside one transform so it
+// can be repositioned/re-tilted as a unit. Scene anatomy (normalized car):
+// nose/windshield = +z · driver side = -x · console top ≈ y -0.12.
+//
+// FORWARD: local +z = toward the windshield. Pushing the knob "up" the gate
+// (gears 1/3/5) is therefore pushing it toward the glass, like a real car.
+const GATE_CENTER = new THREE.Vector3(0.05, -0.125, 0.18);
+// Ergonomic rake: ~12° about X, top of the plate tipped back toward the
+// driver so the gate faces their eye line rather than lying dead flat.
+const GATE_TILT_X = -0.21;
+// Uniform scale of the whole assembly — sized to the console width
+const GATE_SCALE = 0.8;
 
-// H-path segments as [fromLocalXZ, toLocalXZ]
+const GATE_QUAT    = new THREE.Quaternion().setFromEuler(new THREE.Euler(GATE_TILT_X, 0, 0));
+const GATE_MAT     = new THREE.Matrix4().compose(GATE_CENTER, GATE_QUAT, new THREE.Vector3(GATE_SCALE, GATE_SCALE, GATE_SCALE));
+const GATE_MAT_INV = GATE_MAT.clone().invert();
+const GATE_NORMAL  = new THREE.Vector3(0, 1, 0).applyQuaternion(GATE_QUAT);
+
+// H-path segments as [fromLocalXZ, toLocalXZ].
+// Handedness: the driver faces +z (windshield), so from their POV local +x
+// projects to screen-LEFT. Gears 1/2 therefore live on the +x lane so 1st
+// is on the driver's left, like a real H-gate; R extends past 6 on -x.
 const H_SEGS: [[number, number], [number, number]][] = [
-  [[-LANE, 0],          [ LANE, 0]         ], // horizontal crossbar
-  [[-LANE, 0],          [-LANE,  SLOT]     ], // left lane → gear 1
-  [[-LANE, 0],          [-LANE, -SLOT]     ], // left lane → gear 2
+  [[ LANE, 0],          [-LANE, 0]         ], // horizontal crossbar
+  [[ LANE, 0],          [ LANE,  SLOT]     ], // driver-left lane → gear 1
+  [[ LANE, 0],          [ LANE, -SLOT]     ], // driver-left lane → gear 2
   [[0,     0],          [0,      SLOT]     ], // center lane → gear 3
   [[0,     0],          [0,     -SLOT]     ], // center lane → gear 4
-  [[ LANE, 0],          [ LANE,  SLOT]     ], // right lane → gear 5
-  [[ LANE, 0],          [ LANE, -SLOT]     ], // right lane → gear 6
-  [[ LANE, -SLOT],      [ LANE + R_EXT, -SLOT]], // R extension
+  [[-LANE, 0],          [-LANE,  SLOT]     ], // driver-right lane → gear 5
+  [[-LANE, 0],          [-LANE, -SLOT]     ], // driver-right lane → gear 6
+  [[-LANE, -SLOT],      [-LANE - R_EXT, -SLOT]], // R extension past gear 6
 ];
 
-// ─── Gear → route config ─────────────────────────────────────────────────────
+// ─── Gear → action config ────────────────────────────────────────────────────
+// 'scroll' moves the page timeline to a normalized progress (0–1);
+// 'panel' opens an in-page overlay section; 'neutral' closes any open panel.
+export type GearAction =
+  | { type: 'scroll'; to: number }
+  | { type: 'panel'; id: SectionId }
+  | { type: 'neutral' };
+
 export interface GearDef {
-  gear:  string;
-  label: string;
-  sub:   string;
-  route: string | null; // null = neutral/no-nav; '__TOP__' = scroll to top
-  lx:    number;
-  lz:    number;
+  gear:   string;
+  label:  string;
+  sub:    string;
+  action: GearAction;
+  lx:     number;
+  lz:     number;
 }
 
 export const GEARS: GearDef[] = [
-  { gear: 'N', label: 'Neutral',    sub: 'idle',          route: null,       lx: 0,            lz: 0      },
-  { gear: '1', label: 'Home',       sub: 'start here',    route: '/',        lx: -LANE,        lz:  SLOT  },
-  { gear: '2', label: 'About',      sub: 'who I am',      route: '/about',   lx: -LANE,        lz: -SLOT  },
-  { gear: '3', label: 'Projects',   sub: 'built work',    route: '/projects',lx: 0,            lz:  SLOT  },
-  { gear: '4', label: 'Experience', sub: 'work history',  route: '/experience', lx: 0,         lz: -SLOT  },
-  { gear: '5', label: 'Skills',     sub: 'tech stack',    route: '/skills',  lx:  LANE,        lz:  SLOT  },
-  { gear: '6', label: 'Contact',    sub: 'get in touch',  route: '/contact', lx:  LANE,        lz: -SLOT  },
-  { gear: 'R', label: 'Reverse',    sub: 'hero view',     route: '__TOP__',  lx:  LANE + R_EXT,lz: -SLOT  },
+  { gear: 'N', label: 'Neutral',    sub: 'idle',          action: { type: 'neutral' },               lx: 0,               lz: 0      },
+  { gear: '1', label: 'Home',       sub: 'hero view',     action: { type: 'scroll', to: 0 },         lx:  LANE,           lz:  SLOT  },
+  { gear: '2', label: 'About',      sub: 'who I am',      action: { type: 'scroll', to: 0.32 },      lx:  LANE,           lz: -SLOT  },
+  { gear: '3', label: 'Projects',   sub: 'built work',    action: { type: 'panel', id: 'projects' }, lx: 0,               lz:  SLOT  },
+  { gear: '4', label: 'Experience', sub: 'work history',  action: { type: 'panel', id: 'experience' }, lx: 0,             lz: -SLOT  },
+  { gear: '5', label: 'Skills',     sub: 'tech stack',    action: { type: 'panel', id: 'skills' },   lx: -LANE,           lz:  SLOT  },
+  { gear: '6', label: 'Contact',    sub: 'get in touch',  action: { type: 'panel', id: 'contact' },  lx: -LANE,           lz: -SLOT  },
+  { gear: 'R', label: 'Reverse',    sub: 'back to top',   action: { type: 'scroll', to: 0 },         lx: -LANE - R_EXT,   lz: -SLOT  },
 ];
 
 // ─── Math helpers ─────────────────────────────────────────────────────────────
@@ -87,14 +113,10 @@ function nearestGear(lx: number, lz: number): GearDef {
   return bestD < SNAP_THRESH ? best : GEARS[0]; // fall back to N
 }
 
-// Convert a world position to gate-local [lx, lz]
-function worldToLocal(wx: number, wz: number): [number, number] {
-  return [wx - GATE_CENTER.x, wz - GATE_CENTER.z];
-}
-
-// World position for a gate-local offset
-function localToWorld(lx: number, lz: number, yOff = 0): THREE.Vector3 {
-  return new THREE.Vector3(GATE_CENTER.x + lx, GATE_CENTER.y + yOff, GATE_CENTER.z + lz);
+// Convert a world position to gate-local [lx, lz] (drops the local-y component)
+function worldToGateLocal(world: THREE.Vector3): [number, number] {
+  const l = world.clone().applyMatrix4(GATE_MAT_INV);
+  return [l.x, l.z];
 }
 
 // ─── Audio ────────────────────────────────────────────────────────────────────
@@ -127,36 +149,74 @@ function haptic() {
   if (typeof navigator !== 'undefined' && 'vibrate' in navigator) navigator.vibrate(28);
 }
 
-// ─── Gate rail lines ─────────────────────────────────────────────────────────
-function GateRails({ activeGear }: { activeGear: string }) {
-  const geo = useMemo(() => {
-    const pts: number[] = [];
-    for (const [[ax, az], [bx, bz]] of H_SEGS) {
-      const a = localToWorld(ax, az, 0.002);
-      const b = localToWorld(bx, bz, 0.002);
-      pts.push(a.x, a.y, a.z, b.x, b.y, b.z);
-    }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
-    return g;
-  }, []);
+// ─── Physical gate plate — milled metal surround with the H-slots cut out ───
+// Classic Lamborghini open-gate look: the knob shaft slides through the slots.
+function GatePlate({ activeGear }: { activeGear: string }) {
+  const plateGeo = useMemo(() => {
+    const w  = 0.011;              // slot half-width (shaft r=0.009 clears it)
+    const S  = SLOT + 0.013;       // slot ends extend a touch past gear centers
+    const L  = LANE;
+    const RXE = LANE + R_EXT + 0.013; // R spur end
+    // Shape is built in XY; rotateX(-π/2) maps shape +y → world -z, so z is
+    // negated (n). x is mirrored (m) to put the R spur on -x, matching GEARS
+    // (gears 1/2 on +x = driver's left; THREE fixes hole winding itself).
+    const n = (z: number) => -z;
+    const m = (x: number) => -x;
 
-  const mat = useMemo(
-    () => new THREE.LineBasicMaterial({ color: 0x00b4d8, transparent: true, opacity: 0.35 }),
-    [],
-  );
+    // Outer plate: rounded rectangle
+    const ox0 = -L - 0.042, ox1 = RXE + 0.030;
+    const oz  = S + 0.030, r = 0.016;
+    const shape = new THREE.Shape();
+    shape.moveTo(m(ox0 + r), n(oz));
+    shape.lineTo(m(ox1 - r), n(oz));
+    shape.quadraticCurveTo(m(ox1), n(oz), m(ox1), n(oz) + r);
+    shape.lineTo(m(ox1), n(-oz) - r);
+    shape.quadraticCurveTo(m(ox1), n(-oz), m(ox1 - r), n(-oz));
+    shape.lineTo(m(ox0 + r), n(-oz));
+    shape.quadraticCurveTo(m(ox0), n(-oz), m(ox0), n(-oz) - r);
+    shape.lineTo(m(ox0), n(oz) + r);
+    shape.quadraticCurveTo(m(ox0), n(oz), m(ox0 + r), n(oz));
+
+    // Single connected hole tracing the H pattern + R spur
+    const h = new THREE.Path();
+    const pts: [number, number][] = [
+      [-L - w,  S], [-L + w,  S], [-L + w,  w], [-w,  w], [-w,  S],
+      [ w,  S], [ w,  w], [ L - w,  w], [ L - w,  S], [ L + w,  S],
+      [ L + w, -SLOT + w], [RXE, -SLOT + w], [RXE, -SLOT - w], [ L + w, -SLOT - w],
+      [ L + w, -S], [ L - w, -S], [ L - w, -w], [ w, -w], [ w, -S],
+      [-w, -S], [-w, -w], [-L + w, -w], [-L + w, -S], [-L - w, -S],
+    ];
+    h.moveTo(m(pts[0][0]), n(pts[0][1]));
+    for (let i = 1; i < pts.length; i++) h.lineTo(m(pts[i][0]), n(pts[i][1]));
+    h.closePath();
+    shape.holes.push(h);
+
+    const geo = new THREE.ExtrudeGeometry(shape, { depth: 0.006, bevelEnabled: true, bevelThickness: 0.0015, bevelSize: 0.0015, bevelSegments: 2 });
+    geo.rotateX(-Math.PI / 2);
+    return geo;
+  }, []);
 
   // Slot dots — one per gear (except N)
   const dotPositions = useMemo(() => GEARS.filter(g => g.gear !== 'N'), []);
 
+  // All positions are gate-local — the parent group applies GATE_CENTER + tilt
   return (
     <group>
-      <primitive object={new THREE.LineSegments(geo, mat)} />
+      {/* Brushed-metal plate, top surface just under the knob's collar */}
+      <mesh geometry={plateGeo} position={[0, -0.012, 0]}>
+        <meshStandardMaterial color="#525c68" metalness={0.95} roughness={0.32} envMapIntensity={1.2} />
+      </mesh>
+      {/* Black base skirt seating the plate flush into the console — tall
+          enough to bury its bottom inside the console geometry at any tilt */}
+      <mesh position={[-0.012, -0.062, 0]}>
+        <boxGeometry args={[0.225, 0.10, 0.175]} />
+        <meshStandardMaterial color="#12161c" metalness={0.6} roughness={0.45} />
+      </mesh>
       {dotPositions.map(g => {
         const isActive = g.gear === activeGear;
-        const pos = localToWorld(g.lx, g.lz, 0.004);
         return (
-          <mesh key={g.gear} position={pos.toArray()}>
+          // Seated down in the slot channel, like inset LEDs
+          <mesh key={g.gear} position={[g.lx, -0.008, g.lz]}>
             <sphereGeometry args={[isActive ? 0.0045 : 0.003, 8, 8]} />
             <meshStandardMaterial
               color={isActive ? '#00e5ff' : '#00b4d8'}
@@ -178,19 +238,20 @@ function GearLabels({ activeGear }: { activeGear: string }) {
     <>
       {GEARS.filter(g => g.gear !== 'N').map(g => {
         const isActive = g.gear === activeGear;
-        // Label sits above gears in the top row, below in the bottom row
-        const yOff = g.lz > 0 ? 0.022 : -0.022;
-        const pos = localToWorld(g.lx, g.lz + yOff, 0.006);
+        // Label sits beyond the slot end: forward of the top row, behind the bottom row
+        const zOff = g.lz > 0 ? 0.024 : -0.024;
         return (
-          <Html key={g.gear} position={pos.toArray()} center zIndexRange={[30, 0]}>
+          <Html key={g.gear} position={[g.lx, 0.006, g.lz + zOff]} center zIndexRange={[30, 0]}>
             <div
               style={{
                 fontFamily: 'monospace',
-                fontSize: 7,
+                fontSize: 10,
                 letterSpacing: '0.06em',
                 textTransform: 'uppercase',
-                color:      isActive ? '#00e5ff' : 'rgba(0,180,216,0.45)',
-                textShadow: isActive ? '0 0 8px #00e5ff, 0 0 16px #00b4d8' : 'none',
+                color:      isActive ? '#00e5ff' : 'rgba(140,225,255,0.85)',
+                textShadow: isActive
+                  ? '0 0 8px #00e5ff, 0 0 16px #00b4d8'
+                  : '0 1px 3px rgba(0,0,0,0.9)',
                 whiteSpace: 'nowrap',
                 pointerEvents: 'none',
                 userSelect:    'none',
@@ -221,12 +282,13 @@ function GearHUD({
   const wrapRef  = useRef<HTMLDivElement>(null);
   const def      = GEARS.find(g => g.gear === activeGear)!;
   const isNeutral = activeGear === 'N';
-  // Position near instrument cluster — upper-left dash area in world space
-  const hudPos: [number, number, number] = [-0.04, 0.65, -0.60];
+  // Floats above/forward of the gate, toward the dash — projects near the top
+  // of the p=1.0 driver-POV framing (cam [-0.09,0.13,-0.04] → look [0.05,-0.08,0.22])
+  const hudPos: [number, number, number] = [0.09, 0.03, 0.29];
 
   useFrame(() => {
     if (!wrapRef.current) return;
-    const opacity = THREE.MathUtils.clamp((pRef.current - 0.54) / 0.05, 0, 1);
+    const opacity = THREE.MathUtils.clamp((pRef.current - 0.58) / 0.05, 0, 1);
     wrapRef.current.style.opacity      = String(opacity);
     wrapRef.current.style.pointerEvents = opacity > 0.05 ? 'auto' : 'none';
   });
@@ -321,22 +383,25 @@ function ShifterKnob({
   pRef,
   muted,
   onGearEngage,
+  onNavScroll,
 }: {
   pRef:         React.MutableRefObject<number>;
   muted:        boolean;
   onGearEngage: (g: GearDef) => void;
+  onNavScroll:  (p: number) => void;
 }) {
   const { camera, gl } = useThree();
   const knobRef    = useRef<THREE.Group>(null);
   const isDragging = useRef(false);
 
-  // Spring state (all refs — updated in useFrame, no React re-renders)
-  const knobPos   = useRef(GATE_CENTER.clone());
+  // Spring state — all in GATE-LOCAL coordinates (the parent group applies
+  // GATE_CENTER + tilt), all refs so nothing re-renders per frame
+  const knobPos   = useRef(new THREE.Vector3());
   const knobVel   = useRef(new THREE.Vector3());
-  const targetPos = useRef(GATE_CENTER.clone());
+  const targetPos = useRef(new THREE.Vector3());
   const curGear   = useRef<GearDef>(GEARS[0]);
 
-  // ── Raycast pointer→gate plane ──────────────────────────────────────────
+  // ── Raycast pointer→tilted gate plane, returns gate-local [lx, lz] ──────
   const hitGatePlane = useCallback((clientX: number, clientY: number): [number, number] | null => {
     const canvas = gl.domElement;
     const rect   = canvas.getBoundingClientRect();
@@ -344,38 +409,49 @@ function ShifterKnob({
     const ndcY   = -((clientY - rect.top)  / rect.height) * 2 + 1;
     const ray    = new THREE.Raycaster();
     ray.setFromCamera(new THREE.Vector2(ndcX, ndcY), camera);
-    const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -GATE_CENTER.y);
+    const plane = new THREE.Plane().setFromNormalAndCoplanarPoint(GATE_NORMAL, GATE_CENTER);
     const hit   = new THREE.Vector3();
-    return ray.ray.intersectPlane(plane, hit) ? [hit.x, hit.z] : null;
+    return ray.ray.intersectPlane(plane, hit) ? worldToGateLocal(hit) : null;
   }, [camera, gl]);
 
   // ── Engage a gear ──────────────────────────────────────────────────────
   const engageGear = useCallback((g: GearDef) => {
     if (g.gear === curGear.current.gear) return;
     curGear.current = g;
-    targetPos.current.set(
-      GATE_CENTER.x + g.lx,
-      GATE_CENTER.y,
-      GATE_CENTER.z + g.lz,
-    );
+    targetPos.current.set(g.lx, 0, g.lz);
     playClick(muted);
     haptic();
     onGearEngage(g);
 
-    if (g.route === '__TOP__') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (g.route) {
-      setTimeout(() => { window.location.href = g.route!; }, 480);
+    const action = g.action;
+    if (action.type === 'panel') {
+      // Let the knob spring settle into the slot before the panel fades in
+      setTimeout(() => useSiteStore.getState().openSection(action.id, g.gear), 480);
+    } else if (action.type === 'scroll') {
+      // Close any open panel but keep this gear engaged (gear→'N' would
+      // trigger the external-reset subscription and spring the knob home)
+      useSiteStore.setState({ activeSection: null, gear: g.gear });
+      onNavScroll(action.to);
+    } else {
+      useSiteStore.getState().closeSection();
     }
-  }, [muted, onGearEngage]);
+  }, [muted, onGearEngage, onNavScroll]);
 
   // ── Pointer down on knob ───────────────────────────────────────────────
   const handlePointerDown = useCallback((e: ThreeEvent<PointerEvent>) => {
-    if (pRef.current < 0.52) return;   // only active in cockpit
+    if (pRef.current < 0.60) return;   // only active once camera frames the shifter
     e.stopPropagation();
     isDragging.current = true;
     try { gl.domElement.setPointerCapture(e.nativeEvent.pointerId); } catch {}
   }, [pRef, gl]);
+
+  // ── External reset: panel closed elsewhere → spring knob home to N ────
+  useEffect(() => useSiteStore.subscribe((s) => {
+    if (s.gear === 'N' && curGear.current.gear !== 'N') {
+      curGear.current = GEARS[0];
+      targetPos.current.set(0, 0, 0);
+    }
+  }), []);
 
   // ── Global pointer move / up on canvas ────────────────────────────────
   useEffect(() => {
@@ -383,11 +459,10 @@ function ShifterKnob({
 
     function onMove(e: PointerEvent) {
       if (!isDragging.current) return;
-      const wxz = hitGatePlane(e.clientX, e.clientY);
-      if (!wxz) return;
-      const [lx, lz]    = worldToLocal(wxz[0], wxz[1]);
-      const [px, pz]    = projectOnHPath(lx, lz);
-      targetPos.current.set(GATE_CENTER.x + px, GATE_CENTER.y, GATE_CENTER.z + pz);
+      const hit = hitGatePlane(e.clientX, e.clientY);
+      if (!hit) return;
+      const [px, pz] = projectOnHPath(hit[0], hit[1]);
+      targetPos.current.set(px, 0, pz);
     }
 
     function onUp(e: PointerEvent) {
@@ -395,13 +470,9 @@ function ShifterKnob({
       isDragging.current = false;
       try { gl.domElement.releasePointerCapture(e.pointerId); } catch {}
 
-      const wxz = hitGatePlane(e.clientX, e.clientY);
-      const [lx, lz] = wxz
-        ? worldToLocal(wxz[0], wxz[1])
-        : [knobPos.current.x - GATE_CENTER.x, knobPos.current.z - GATE_CENTER.z];
-
-      const g = nearestGear(lx, lz);
-      engageGear(g);
+      const hit = hitGatePlane(e.clientX, e.clientY);
+      const [lx, lz] = hit ?? [knobPos.current.x, knobPos.current.z];
+      engageGear(nearestGear(lx, lz));
     }
 
     canvas.addEventListener('pointermove', onMove);
@@ -431,9 +502,28 @@ function ShifterKnob({
   });
 
   return (
+    <>
+      {/* Invisible click targets — tap a gate slot to shift directly */}
+      {GEARS.filter(g => g.gear !== 'N').map(g => (
+        <mesh
+          key={g.gear}
+          position={[g.lx, 0.004, g.lz]}
+          onClick={(e) => {
+            if (pRef.current < 0.60) return;
+            e.stopPropagation();
+            engageGear(g);
+          }}
+          onPointerEnter={() => { if (pRef.current >= 0.60) document.body.style.cursor = 'pointer'; }}
+          onPointerLeave={() => { document.body.style.cursor = ''; }}
+        >
+          <sphereGeometry args={[0.016, 8, 8]} />
+          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+        </mesh>
+      ))}
+
     <group
       ref={knobRef}
-      position={GATE_CENTER.toArray()}
+      position={[0, 0, 0]}
       onPointerDown={handlePointerDown}
       onPointerEnter={() => { if (knobRef.current) document.body.style.cursor = 'grab'; }}
       onPointerLeave={() => { document.body.style.cursor = ''; }}
@@ -474,11 +564,12 @@ function ShifterKnob({
         <meshStandardMaterial color="#00e5ff" emissive="#00e5ff" emissiveIntensity={1.2} />
       </mesh>
     </group>
+    </>
   );
 }
 
-// ─── Reduced-motion fallback: flat SVG H-pattern ─────────────────────────────
-export function GearShifterFallback() {
+// ─── Flat SVG H-pattern (mobile / no-WebGL / reduced-motion fallback) ────────
+export function GearShifterFallback({ onSelect }: { onSelect?: (def: GearDef) => void }) {
   const W = 220, H = 280, cx = W / 2, cy = H / 2;
   const COL: Record<string, number> = { L: cx - 56, C: cx, R: cx + 56 };
   const ROW: Record<string, number> = { top: cy - 52, mid: cy, bot: cy + 52 };
@@ -497,8 +588,13 @@ export function GearShifterFallback() {
 
   const handleClick = (def: GearDef) => {
     setActive(def.gear);
-    if (def.route === '__TOP__') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
-    if (def.route) setTimeout(() => { window.location.href = def.route!; }, 260);
+    if (onSelect) { onSelect(def); return; }
+    // Default: in-flow anchor navigation (used by the mobile fallback page)
+    if (def.action.type === 'panel') {
+      document.getElementById(def.action.id)?.scrollIntoView({ behavior: 'smooth' });
+    } else if (def.action.type === 'scroll') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -551,10 +647,10 @@ export function GearShifterFallback() {
 // ─── GearShifter root (inside Canvas) ────────────────────────────────────────
 export default function GearShifter({
   pRef,
-  reducedMotion = false,
+  onNavScroll,
 }: {
-  pRef:          React.MutableRefObject<number>;
-  reducedMotion?: boolean;
+  pRef:        React.MutableRefObject<number>;
+  onNavScroll: (p: number) => void;
 }) {
   const [activeGear, setActiveGear] = useState('N');
   const [muted,      setMuted]      = useState(false);
@@ -563,27 +659,40 @@ export default function GearShifter({
   const prevVisible = useRef(false);
 
   useFrame(() => {
-    const v = pRef.current >= 0.54;
+    const v = pRef.current >= 0.58;
     if (v !== prevVisible.current) { prevVisible.current = v; setVisible(v); }
   });
 
-  if (reducedMotion) return null; // parent renders SVG fallback
+  // Keep the HUD/labels in sync when a panel close springs the knob back to N
+  useEffect(() => useSiteStore.subscribe((s) => {
+    if (s.gear === 'N') setActiveGear('N');
+  }), []);
 
+  // GearLabels/GearHUD use drei <Html>, whose DOM stays visible even inside
+  // an invisible group — mount them only when the shifter is actually in view.
+  // The inner group is the GATE FRAME: every child is in gate-local coords,
+  // mounted on the console and raked toward the driver as one unit.
   return (
     <group visible={visible}>
-      <GateRails  activeGear={activeGear} />
-      <GearLabels activeGear={activeGear} />
-      <ShifterKnob
-        pRef={pRef}
-        muted={muted}
-        onGearEngage={g => setActiveGear(g.gear)}
-      />
-      <GearHUD
-        activeGear={activeGear}
-        muted={muted}
-        onMuteToggle={() => setMuted(m => !m)}
-        pRef={pRef}
-      />
+      <group position={GATE_CENTER.toArray()} rotation={[GATE_TILT_X, 0, 0]} scale={GATE_SCALE}>
+        <GatePlate  activeGear={activeGear} />
+        {visible && <GearLabels activeGear={activeGear} />}
+        <ShifterKnob
+          pRef={pRef}
+          muted={muted}
+          onGearEngage={g => setActiveGear(g.gear)}
+          onNavScroll={onNavScroll}
+        />
+      </group>
+      {/* HUD stays in world space — positioned for the driver-POV nav framing */}
+      {visible && (
+        <GearHUD
+          activeGear={activeGear}
+          muted={muted}
+          onMuteToggle={() => setMuted(m => !m)}
+          pRef={pRef}
+        />
+      )}
     </group>
   );
 }

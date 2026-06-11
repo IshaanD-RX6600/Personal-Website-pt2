@@ -24,7 +24,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* Preload the GLB so the browser fetches it in parallel with JS */}
-        <link rel="preload" href="/2024_lbsilhouette_works_murcielago_gt_evo.glb" as="fetch" crossOrigin="anonymous" />
+        <link rel="preload" href="/car.glb" as="fetch" crossOrigin="anonymous" />
       </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
