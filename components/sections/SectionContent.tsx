@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from 'react';
 import type { SectionId } from '@/stores/useSiteStore';
 
 // Shared by SectionPanels (3D overlay mode) and MobileFallback (stacked mode).
@@ -196,13 +197,84 @@ function Skills() {
 }
 
 // ─── Contact ─────────────────────────────────────────────────────────────────
+const INPUT_CLS =
+  'w-full bg-transparent border border-primary/20 px-3 py-2.5 text-sm text-foreground ' +
+  'placeholder:text-muted-foreground/50 focus:border-primary/60 focus:outline-none transition-colors';
+
+function ContactForm() {
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [error, setError] = useState('');
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const data = Object.fromEntries(new FormData(form).entries());
+    setStatus('sending');
+    setError('');
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? 'Failed to send.');
+      setStatus('sent');
+      form.reset();
+    } catch (err) {
+      setStatus('error');
+      setError(err instanceof Error ? err.message : 'Failed to send.');
+    }
+  }
+
+  if (status === 'sent') {
+    return (
+      <div className="border border-primary/40 px-4 py-6 text-center space-y-2">
+        <div className="text-primary font-bold text-sm">MESSAGE SENT</div>
+        <p className="text-sm text-muted-foreground">Thanks — I read everything and I&apos;ll get back to you.</p>
+        <button className="bp-btn text-xs mt-2" onClick={() => setStatus('idle')}>[ send another ]</button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3">
+      {/* Honeypot — hidden from humans, bots fill it and get silently dropped */}
+      <input type="text" name="company" tabIndex={-1} autoComplete="off" aria-hidden="true"
+        className="hidden" />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <label className="block">
+          <span className="bp-annotation block mb-1">NAME</span>
+          <input name="name" required maxLength={200} placeholder="Your name" className={INPUT_CLS} />
+        </label>
+        <label className="block">
+          <span className="bp-annotation block mb-1">EMAIL</span>
+          <input name="email" type="email" required maxLength={200} placeholder="you@example.com" className={INPUT_CLS} />
+        </label>
+      </div>
+      <label className="block">
+        <span className="bp-annotation block mb-1">MESSAGE</span>
+        <textarea name="message" required maxLength={5000} rows={5} placeholder="What's on your mind?"
+          className={`${INPUT_CLS} resize-y`} />
+      </label>
+      <div className="flex items-center gap-3">
+        <button type="submit" disabled={status === 'sending'} className="bp-btn text-xs disabled:opacity-50">
+          {status === 'sending' ? '[ sending… ]' : '[ send message ]'}
+        </button>
+        {status === 'error' && <span className="text-xs text-red-400">{error}</span>}
+      </div>
+    </form>
+  );
+}
+
 function Contact() {
   return (
     <div className="space-y-6 max-w-md">
       <p className="text-sm text-muted-foreground">
-        Want to work together, or just talk cars and code? Reach out anywhere below —
-        I read everything.
+        Want to work together, or just talk cars and code? Drop a message — it lands
+        straight in my inbox — or reach out anywhere below.
       </p>
+      <ContactForm />
       <div className="space-y-2">
         <a href={`mailto:${LINKS.email}`} className="flex items-baseline justify-between gap-3 border border-primary/20 px-3 py-2.5 hover:border-primary/60 transition-colors">
           <span className="bp-annotation">EMAIL</span>

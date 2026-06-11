@@ -16,19 +16,54 @@ const SNAP_THRESH = SLOT * 0.88;
 const SPRING_K    = 200;
 const DAMPING     = 26;
 
-// ─── Gate frame: where the assembly mounts on the car ────────────────────────
-// The whole shifter (plate + knob + labels) lives inside one transform so it
-// can be repositioned/re-tilted as a unit. Scene anatomy (normalized car):
-// nose/windshield = +z · driver side = -x · console top ≈ y -0.12.
+// ─── Gate frame: derived from measured cabin geometry — nothing hand-placed ──
+// Measurements come from the real GLB vertex data (run: node scripts/measure-cabin.mjs),
+// expressed in the normalized car space CarModel.tsx produces (4-unit box
+// centered at origin · nose/windshield = +z · steering column on +x).
 //
-// FORWARD: local +z = toward the windshield. Pushing the knob "up" the gate
-// (gears 1/3/5) is therefore pushing it toward the glass, like a real car.
-const GATE_CENTER = new THREE.Vector3(0.05, -0.125, 0.18);
-// Ergonomic rake: ~12° about X, top of the plate tipped back toward the
-// driver so the gate faces their eye line rather than lying dead flat.
-const GATE_TILT_X = -0.21;
-// Uniform scale of the whole assembly — sized to the console width
-const GATE_SCALE = 0.8;
+// FORWARD: local +z = toward the windshield (+z = nose per scene anatomy).
+// Gears 1/3/5 (lz>0) push toward the glass; R/2/4/6 pull toward the driver.
+const SEAT_INNER_L = -0.115; // left seat inner edge  (measured, z∈[0.05,0.30])
+const SEAT_INNER_R =  0.110; // right seat inner edge (measured)
+const TUNNEL_TOP_Y = -0.165; // tunnel top — flat over x∈[-0.09,0.09], z∈[0.20,0.44] (measured)
+const TUNNEL_Z     =  0.30;  // center of that flat patch
+
+// Plate intrinsic extents in gate-local units (must mirror GatePlate's shape)
+const PLATE_X0 = -(LANE + R_EXT + 0.013 + 0.030); // R-spur edge   (-0.140)
+const PLATE_X1 =   LANE + 0.042;                  // gear-1/2 edge (+0.097)
+const PLATE_HZ =   SLOT + 0.013 + 0.030;          // z half-extent (±0.098)
+const PLATE_UNDERSIDE = -0.0135;                  // underside local y (mesh y -0.012 − bevel)
+// The plate is x-asymmetric — this local shift centers its bbox on the anchor
+const PLATE_XOFF = -(PLATE_X0 + PLATE_X1) / 2;
+
+// Derived placement:
+//   scale  → plate width = 70% of the seat gap (clearance to BOTH seats)
+//   anchor → seat-gap midpoint, seated on the tunnel top surface
+//   rake   → 15° pitch toward the driver; roll/yaw stay 0 so the slots run
+//            exactly along the car's forward axis (R points to the rear)
+const SEAT_GAP    = SEAT_INNER_R - SEAT_INNER_L;
+const GATE_SCALE  = (0.7 * SEAT_GAP) / (PLATE_X1 - PLATE_X0);
+const GATE_TILT_X = -Math.PI / 12;
+const COS_TILT = Math.cos(GATE_TILT_X), SIN_TILT = Math.sin(GATE_TILT_X);
+const EMBED = 0.004; // sink the resting edge a hair into the tunnel mesh
+// A pitched plate contacts the ground along its rear underside edge — seat
+// THAT edge on the tunnel surface (the skirt fills the wedge under the front).
+const REAR_UNDER_Y = PLATE_UNDERSIDE * COS_TILT + PLATE_HZ * SIN_TILT;
+export const GATE_ANCHOR = new THREE.Vector3(
+  (SEAT_INNER_L + SEAT_INNER_R) / 2,
+  TUNNEL_TOP_Y - EMBED - GATE_SCALE * REAR_UNDER_Y,
+  TUNNEL_Z,
+);
+// Gate frame = anchor ∘ local x-offset; pitch never moves x, so fold it in
+const GATE_CENTER = new THREE.Vector3(GATE_ANCHOR.x + GATE_SCALE * PLATE_XOFF, GATE_ANCHOR.y, GATE_ANCHOR.z);
+
+// Base skirt: the plate footprint (slightly inset), spanning from the plate
+// underside down far enough that even its raised front corner stays below the
+// tunnel surface — fills the wedge the rake opens, no visible air gap.
+const SKIRT_HX  = ((PLATE_X1 - PLATE_X0) / 2) * 0.96;
+const SKIRT_HZ  = PLATE_HZ * 0.96;
+const SKIRT_TOP = PLATE_UNDERSIDE;
+const SKIRT_BOT = ((TUNNEL_TOP_Y - 0.01 - GATE_ANCHOR.y) / GATE_SCALE + SKIRT_HZ * SIN_TILT) / COS_TILT;
 
 const GATE_QUAT    = new THREE.Quaternion().setFromEuler(new THREE.Euler(GATE_TILT_X, 0, 0));
 const GATE_MAT     = new THREE.Matrix4().compose(GATE_CENTER, GATE_QUAT, new THREE.Vector3(GATE_SCALE, GATE_SCALE, GATE_SCALE));
@@ -101,6 +136,26 @@ function projectOnHPath(lx: number, lz: number): [number, number] {
     if (d < bestD) { bestD = d; best = [cx, cz]; }
   }
   return best;
+}
+
+// Slides from the current on-path position toward the pointer, restricted to
+// segments the knob is currently ON. A global nearest-point projection would
+// let the knob jump between adjacent slot ends straight through the plate
+// metal; this way lane changes can only happen through the crossbar junctions,
+// exactly like a real gated shifter.
+const TOUCH_EPS = 0.004; // how close to a segment counts as "on it"
+function slideOnHPath(curX: number, curZ: number, px: number, pz: number): [number, number] {
+  let best: [number, number] | null = null;
+  let bestD = Infinity;
+  for (const [[ax, az], [bx, bz]] of H_SEGS) {
+    const [tx, tz] = closestOnSeg(curX, curZ, ax, az, bx, bz);
+    if (Math.hypot(tx - curX, tz - curZ) > TOUCH_EPS) continue; // not on this segment
+    const [cx, cz] = closestOnSeg(px, pz, ax, az, bx, bz);
+    const d = Math.hypot(cx - px, cz - pz);
+    if (d < bestD) { bestD = d; best = [cx, cz]; }
+  }
+  // Drifted off-path somehow → snap back to the path (don't chase the pointer)
+  return best ?? projectOnHPath(curX, curZ);
 }
 
 function nearestGear(lx: number, lz: number): GearDef {
@@ -206,10 +261,12 @@ function GatePlate({ activeGear }: { activeGear: string }) {
       <mesh geometry={plateGeo} position={[0, -0.012, 0]}>
         <meshStandardMaterial color="#525c68" metalness={0.95} roughness={0.32} envMapIntensity={1.2} />
       </mesh>
-      {/* Black base skirt seating the plate flush into the console — tall
-          enough to bury its bottom inside the console geometry at any tilt */}
-      <mesh position={[-0.012, -0.062, 0]}>
-        <boxGeometry args={[0.225, 0.10, 0.175]} />
+      {/* Black base skirt — plate footprint slightly inset, top at the plate
+          underside, bottom below the tunnel surface even at the rake-raised
+          front corner (SKIRT_BOT is solved for exactly that), so the wedge
+          under the front edge is filled and the OEM tunnel top is buried. */}
+      <mesh position={[-PLATE_XOFF, (SKIRT_TOP + SKIRT_BOT) / 2, 0]}>
+        <boxGeometry args={[SKIRT_HX * 2, SKIRT_TOP - SKIRT_BOT, SKIRT_HZ * 2]} />
         <meshStandardMaterial color="#12161c" metalness={0.6} roughness={0.45} />
       </mesh>
       {dotPositions.map(g => {
@@ -282,9 +339,11 @@ function GearHUD({
   const wrapRef  = useRef<HTMLDivElement>(null);
   const def      = GEARS.find(g => g.gear === activeGear)!;
   const isNeutral = activeGear === 'N';
-  // Floats above/forward of the gate, toward the dash — projects near the top
-  // of the p=1.0 driver-POV framing (cam [-0.09,0.13,-0.04] → look [0.05,-0.08,0.22])
-  const hudPos: [number, number, number] = [0.09, 0.03, 0.29];
+  // Floats above/forward of the gate anchor, toward the dash — sits near the
+  // top of the p=1.0 driver-POV framing (camera looks at GATE_ANCHOR).
+  const hudPos: [number, number, number] = [
+    GATE_ANCHOR.x + 0.06, GATE_ANCHOR.y + 0.15, GATE_ANCHOR.z + 0.12,
+  ];
 
   useFrame(() => {
     if (!wrapRef.current) return;
@@ -461,7 +520,9 @@ function ShifterKnob({
       if (!isDragging.current) return;
       const hit = hitGatePlane(e.clientX, e.clientY);
       if (!hit) return;
-      const [px, pz] = projectOnHPath(hit[0], hit[1]);
+      // targetPos always lives ON the path, so sliding from it keeps the knob
+      // inside the slots — it can never cut across the plate between lanes
+      const [px, pz] = slideOnHPath(targetPos.current.x, targetPos.current.z, hit[0], hit[1]);
       targetPos.current.set(px, 0, pz);
     }
 
@@ -470,9 +531,10 @@ function ShifterKnob({
       isDragging.current = false;
       try { gl.domElement.releasePointerCapture(e.pointerId); } catch {}
 
-      const hit = hitGatePlane(e.clientX, e.clientY);
-      const [lx, lz] = hit ?? [knobPos.current.x, knobPos.current.z];
-      engageGear(nearestGear(lx, lz));
+      // Engage the gear nearest to where the knob actually IS (the constrained
+      // target), not the raw pointer — releasing with the pointer over an
+      // unreachable slot must not teleport the knob through the gate.
+      engageGear(nearestGear(targetPos.current.x, targetPos.current.z));
     }
 
     canvas.addEventListener('pointermove', onMove);
@@ -670,19 +732,24 @@ export default function GearShifter({
 
   // GearLabels/GearHUD use drei <Html>, whose DOM stays visible even inside
   // an invisible group — mount them only when the shifter is actually in view.
-  // The inner group is the GATE FRAME: every child is in gate-local coords,
-  // mounted on the console and raked toward the driver as one unit.
+  // ANCHOR group: console-tunnel center (measured), seated on the tunnel top,
+  // pitch-only rake — the whole assembly is parented here and placed at local
+  // (0,0,0); the inner offset just centers the asymmetric plate's bbox so it
+  // clears both seats symmetrically. (anchor ∘ offset ≡ GATE_MAT used by the
+  // drag-plane raycast.)
   return (
     <group visible={visible}>
-      <group position={GATE_CENTER.toArray()} rotation={[GATE_TILT_X, 0, 0]} scale={GATE_SCALE}>
-        <GatePlate  activeGear={activeGear} />
-        {visible && <GearLabels activeGear={activeGear} />}
-        <ShifterKnob
-          pRef={pRef}
-          muted={muted}
-          onGearEngage={g => setActiveGear(g.gear)}
-          onNavScroll={onNavScroll}
-        />
+      <group position={GATE_ANCHOR} rotation={[GATE_TILT_X, 0, 0]} scale={GATE_SCALE}>
+        <group position={[PLATE_XOFF, 0, 0]}>
+          <GatePlate  activeGear={activeGear} />
+          {visible && <GearLabels activeGear={activeGear} />}
+          <ShifterKnob
+            pRef={pRef}
+            muted={muted}
+            onGearEngage={g => setActiveGear(g.gear)}
+            onNavScroll={onNavScroll}
+          />
+        </group>
       </group>
       {/* HUD stays in world space — positioned for the driver-POV nav framing */}
       {visible && (

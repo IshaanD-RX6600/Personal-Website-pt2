@@ -4,7 +4,7 @@ import { Suspense, useEffect, useRef, useMemo, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, Environment, useProgress } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
-import GearShifter from './GearShifter';
+import GearShifter, { GATE_ANCHOR } from './GearShifter';
 import * as THREE from 'three';
 
 // ─── Camera path waypoints — THE scroll choreography tuning surface ────────
@@ -14,9 +14,14 @@ import * as THREE from 'three';
 //   0.20–0.50  fly-in: windshield approach, pass through glass — About overlay
 //   0.50–1.00  cockpit: settle, then push tight onto the gear shifter (nav)
 type WaypointEntry = { p: number; pos: [number,number,number]; look: [number,number,number]; fov: number };
-// Scene anatomy (normalized: car fits a 4-unit box, centered at origin):
-//   ground y=-0.48 · roof y≈+0.48 · nose +z · rear wing -z · driver side -x
-//   cabin: x∈[-0.7,0.7] y∈[-0.42,0.41] z∈[-0.48,1.03] · console top y≈-0.12
+// Scene anatomy (normalized: car fits a 4-unit box, centered at origin —
+// measured from GLB vertices, see scripts/measure-cabin.mjs):
+//   ground y=-0.485 · roof y≈+0.485 · nose +z · rear wing -z · steering on +x
+//   cabin: x∈[-0.7,0.7] y∈[-0.42,0.41] z∈[-0.48,1.03]
+//   console tunnel top y≈-0.165 (flat over z 0.20–0.44) · seats inner edges x≈∓0.11
+// Interior look targets derive from the gear gate's measured anchor so the
+// shifter stays framed wherever the measurements put it.
+const GA = GATE_ANCHOR;
 export const WP: WaypointEntry[] = [
   { p: 0.00, pos: [ 2.40, 1.05, 4.40], look: [ 0.00,  0.28, 0.00], fov: 42 }, // hero 3/4 view
   { p: 0.20, pos: [ 2.40, 1.05, 4.40], look: [ 0.00,  0.28, 0.00], fov: 42 }, // hold (rotation stops here)
@@ -24,9 +29,9 @@ export const WP: WaypointEntry[] = [
   { p: 0.50, pos: [-0.28, 0.12, 0.15], look: [ 0.00,  0.00, 1.00], fov: 70 }, // through glass → driver seat, dash view
   // 0.62–1.00: driver's-seat POV — settle into the seat, then glance
   // down-and-forward at the gate, windshield/dash beyond for context
-  { p: 0.62, pos: [-0.26, 0.13, 0.05], look: [ 0.05, -0.12, 0.30], fov: 60 }, // glance from the seat toward the console
-  { p: 0.80, pos: [-0.18, 0.17, -0.08], look: [ 0.05, -0.11, 0.20], fov: 54 }, // over the driver's knee, gate framed
-  { p: 1.00, pos: [-0.09, 0.12, -0.04], look: [ 0.05, -0.10, 0.21], fov: 50 }, // driver's glance at the shifter — nav mode
+  { p: 0.62, pos: [-0.26, 0.13, 0.05], look: [GA.x, GA.y + 0.03, GA.z + 0.05], fov: 60 }, // glance from the seat toward the console
+  { p: 0.80, pos: [-0.18, 0.17, -0.08], look: [GA.x, GA.y, GA.z], fov: 54 }, // over the driver's knee, gate framed
+  { p: 1.00, pos: [-0.09, 0.12, -0.04], look: [GA.x, GA.y, GA.z], fov: 50 }, // driver's glance at the shifter — nav mode
 ];
 
 const GLB = '/car.glb';
@@ -139,10 +144,32 @@ function CarMesh({ pRef }: { pRef: React.MutableRefObject<number> }) {
     // Centre at origin
     const ctr = new THREE.Box3().setFromObject(c).getCenter(new THREE.Vector3());
     c.position.sub(ctr);
-    // Polish materials: glossy black paint
+    // Polish materials: glossy black paint; hide OEM shifter / console parts
     c.traverse(obj => {
       const mesh = obj as THREE.Mesh;
       if (!mesh.isMesh) return;
+
+      // Hide the original gear-lever and centre-console geometry that our
+      // GearShifter assembly replaces.  Name-based first (covers most GLBs);
+      // bounding-box fallback targets small objects in the tunnel zone.
+      if (/shift|gear|lever|stick|gearshift|console|tunnel/i.test(mesh.name)) {
+        mesh.visible = false;
+        return;
+      }
+      const bb     = new THREE.Box3().setFromObject(mesh);
+      const centre = bb.getCenter(new THREE.Vector3());
+      const size   = bb.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z);
+      if (
+        Math.abs(centre.x) < 0.18 &&          // near tunnel centreline
+        centre.y > -0.32 && centre.y < 0.05 && // inside cabin, above floor
+        centre.z >  0.05 && centre.z < 0.45 && // front console zone
+        maxDim < 0.40                           // small object (not door/body)
+      ) {
+        mesh.visible = false;
+        return;
+      }
+
       (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).forEach(mat => {
         if (mat instanceof THREE.MeshStandardMaterial) {
           mat.roughness = 0.30;
