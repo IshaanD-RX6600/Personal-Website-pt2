@@ -144,32 +144,44 @@ function CarMesh({ pRef }: { pRef: React.MutableRefObject<number> }) {
     // Centre at origin
     const ctr = new THREE.Box3().setFromObject(c).getCenter(new THREE.Vector3());
     c.position.sub(ctr);
-    // Polish materials: glossy black paint; hide OEM shifter / console parts
+    // Remove the OEM shifter bracket: the vertical rectangular carbon frame
+    // standing on the tunnel just ahead of our gear gate (measured at
+    // x -0.135..-0.025 · z 0.385..0.535 — scripts/measure-cabin.mjs). It is
+    // MERGED into the big Interior mesh, so hiding whole meshes can't work;
+    // cull its triangles instead. The opening it leaves is capped by the dark
+    // console panel rendered below the <primitive>.
+    const CULL = { x0: -0.135, x1: -0.025, y0: -0.172, y1: 0.08, z0: 0.385, z1: 0.535 };
+    c.updateMatrixWorld(true);
+    const v = new THREE.Vector3();
+    c.traverse(obj => {
+      const mesh = obj as THREE.Mesh;
+      if (!mesh.isMesh || !/Interior/.test(mesh.name)) return;
+      const idx = mesh.geometry.getIndex();
+      if (!idx) return;
+      const geo = mesh.geometry.clone(); // GLTF cache shares geometries — never mutate
+      const pos = geo.getAttribute('position');
+      const keep: number[] = [];
+      for (let i = 0; i < idx.count; i += 3) {
+        let allIn = true;
+        for (let k = 0; k < 3; k++) {
+          v.fromBufferAttribute(pos as THREE.BufferAttribute, idx.getX(i + k)).applyMatrix4(mesh.matrixWorld);
+          if (v.x < CULL.x0 || v.x > CULL.x1 || v.y < CULL.y0 || v.y > CULL.y1 || v.z < CULL.z0 || v.z > CULL.z1) {
+            allIn = false;
+            break;
+          }
+        }
+        if (!allIn) for (let k = 0; k < 3; k++) keep.push(idx.getX(i + k));
+      }
+      if (keep.length < idx.count) {
+        geo.setIndex(keep);
+        mesh.geometry = geo;
+      }
+    });
+
+    // Polish materials: glossy black paint
     c.traverse(obj => {
       const mesh = obj as THREE.Mesh;
       if (!mesh.isMesh) return;
-
-      // Hide the original gear-lever and centre-console geometry that our
-      // GearShifter assembly replaces.  Name-based first (covers most GLBs);
-      // bounding-box fallback targets small objects in the tunnel zone.
-      if (/shift|gear|lever|stick|gearshift|console|tunnel/i.test(mesh.name)) {
-        mesh.visible = false;
-        return;
-      }
-      const bb     = new THREE.Box3().setFromObject(mesh);
-      const centre = bb.getCenter(new THREE.Vector3());
-      const size   = bb.getSize(new THREE.Vector3());
-      const maxDim = Math.max(size.x, size.y, size.z);
-      if (
-        Math.abs(centre.x) < 0.18 &&          // near tunnel centreline
-        centre.y > -0.32 && centre.y < 0.05 && // inside cabin, above floor
-        centre.z >  0.05 && centre.z < 0.45 && // front console zone
-        maxDim < 0.40                           // small object (not door/body)
-      ) {
-        mesh.visible = false;
-        return;
-      }
-
       (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).forEach(mat => {
         if (mat instanceof THREE.MeshStandardMaterial) {
           mat.roughness = 0.30;
@@ -202,6 +214,12 @@ function CarMesh({ pRef }: { pRef: React.MutableRefObject<number> }) {
   return (
     <group ref={groupRef}>
       <primitive object={model} dispose={null} />
+      {/* Dark console panel capping the opening left by the culled OEM
+          shifter bracket (same measured footprint, slightly padded) */}
+      <mesh position={[-0.08, -0.166, 0.46]}>
+        <boxGeometry args={[0.12, 0.012, 0.16]} />
+        <meshStandardMaterial color="#10141a" metalness={0.3} roughness={0.6} />
+      </mesh>
     </group>
   );
 }

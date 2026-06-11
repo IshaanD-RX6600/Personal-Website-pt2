@@ -25,8 +25,9 @@ const DAMPING     = 26;
 // Gears 1/3/5 (lz>0) push toward the glass; R/2/4/6 pull toward the driver.
 const SEAT_INNER_L = -0.115; // left seat inner edge  (measured, z∈[0.05,0.30])
 const SEAT_INNER_R =  0.110; // right seat inner edge (measured)
-const TUNNEL_TOP_Y = -0.165; // tunnel top — flat over x∈[-0.09,0.09], z∈[0.20,0.44] (measured)
-const TUNNEL_Z     =  0.30;  // center of that flat patch
+const TUNNEL_TOP_Y = -0.165;  // tunnel top — flat over x∈[-0.09,0.09], z∈[0.20,0.44] (measured)
+const SURFACE_CREST = -0.1635; // highest surface vert under the plate footprint (measured)
+const TUNNEL_Z     =  0.30;   // center of that flat patch
 
 // Plate intrinsic extents in gate-local units (must mirror GatePlate's shape)
 const PLATE_X0 = -(LANE + R_EXT + 0.013 + 0.030); // R-spur edge   (-0.140)
@@ -37,33 +38,47 @@ const PLATE_UNDERSIDE = -0.0135;                  // underside local y (mesh y -
 const PLATE_XOFF = -(PLATE_X0 + PLATE_X1) / 2;
 
 // Derived placement:
-//   scale  → plate width = 70% of the seat gap (clearance to BOTH seats)
-//   anchor → seat-gap midpoint, seated on the tunnel top surface
-//   rake   → 15° pitch toward the driver; roll/yaw stay 0 so the slots run
-//            exactly along the car's forward axis (R points to the rear)
+//   scale  → plate width = 55% of the seat gap (clearance to BOTH seats)
+//   anchor → seat-gap midpoint, inset flush into the tunnel top surface
+//   rake   → 5° pitch toward the driver — subtle, so the plate reads as
+//            machined into the console (rear edge flush, ~5 mm lip at the
+//            front) instead of perched on top; roll/yaw stay 0 so the slots
+//            run exactly along the car's forward axis (R points to the rear)
 const SEAT_GAP    = SEAT_INNER_R - SEAT_INNER_L;
-const GATE_SCALE  = (0.7 * SEAT_GAP) / (PLATE_X1 - PLATE_X0);
-const GATE_TILT_X = -Math.PI / 12;
+const GATE_SCALE  = (0.55 * SEAT_GAP) / (PLATE_X1 - PLATE_X0);
+const GATE_TILT_X = -Math.PI / 36;
 const COS_TILT = Math.cos(GATE_TILT_X), SIN_TILT = Math.sin(GATE_TILT_X);
-const EMBED = 0.004; // sink the resting edge a hair into the tunnel mesh
+const EMBED = 0.002; // sink the resting edge a hair below the surface crest
 // A pitched plate contacts the ground along its rear underside edge — seat
-// THAT edge on the tunnel surface (the skirt fills the wedge under the front).
+// THAT edge just under the surface CREST (highest local bump), so no point of
+// the surface pokes through the plate and the rear edge sits truly flush.
 const REAR_UNDER_Y = PLATE_UNDERSIDE * COS_TILT + PLATE_HZ * SIN_TILT;
 export const GATE_ANCHOR = new THREE.Vector3(
   (SEAT_INNER_L + SEAT_INNER_R) / 2,
-  TUNNEL_TOP_Y - EMBED - GATE_SCALE * REAR_UNDER_Y,
+  SURFACE_CREST - EMBED - GATE_SCALE * REAR_UNDER_Y,
   TUNNEL_Z,
 );
 // Gate frame = anchor ∘ local x-offset; pitch never moves x, so fold it in
 const GATE_CENTER = new THREE.Vector3(GATE_ANCHOR.x + GATE_SCALE * PLATE_XOFF, GATE_ANCHOR.y, GATE_ANCHOR.z);
 
-// Base skirt: the plate footprint (slightly inset), spanning from the plate
-// underside down far enough that even its raised front corner stays below the
-// tunnel surface — fills the wedge the rake opens, no visible air gap.
-const SKIRT_HX  = ((PLATE_X1 - PLATE_X0) / 2) * 0.96;
-const SKIRT_HZ  = PLATE_HZ * 0.96;
-const SKIRT_TOP = PLATE_UNDERSIDE;
-const SKIRT_BOT = ((TUNNEL_TOP_Y - 0.01 - GATE_ANCHOR.y) / GATE_SCALE + SKIRT_HZ * SIN_TILT) / COS_TILT;
+// Slot well: the plate's H-shape extruded downward so the slots are hollow
+// channels with real depth — through the cutouts you see dark walls dropping
+// to a floor, not a surface flush against the plate.
+const WELL_DEPTH = 0.035;
+const WELL_BOT   = PLATE_UNDERSIDE - WELL_DEPTH;
+
+// Base skirt: flush with the plate edges (no recessed shadow line), spanning
+// from the well floor down far enough that even its raised front corner stays
+// below the tunnel surface — seals the housing into the console with no
+// visible air gap. Its top sits at WELL_BOT (not the plate underside!) so it
+// never plugs the hollow slot channels from below.
+const SKIRT_HX  = ((PLATE_X1 - PLATE_X0) / 2) * 0.99;
+const SKIRT_HZ  = PLATE_HZ * 0.99;
+const SKIRT_TOP = WELL_BOT;
+const SKIRT_BOT = Math.min(
+  ((TUNNEL_TOP_Y - 0.01 - GATE_ANCHOR.y) / GATE_SCALE + SKIRT_HZ * SIN_TILT) / COS_TILT,
+  SKIRT_TOP - 0.004, // never degenerate — the well may already reach below the surface
+);
 
 const GATE_QUAT    = new THREE.Quaternion().setFromEuler(new THREE.Euler(GATE_TILT_X, 0, 0));
 const GATE_MAT     = new THREE.Matrix4().compose(GATE_CENTER, GATE_QUAT, new THREE.Vector3(GATE_SCALE, GATE_SCALE, GATE_SCALE));
@@ -207,7 +222,7 @@ function haptic() {
 // ─── Physical gate plate — milled metal surround with the H-slots cut out ───
 // Classic Lamborghini open-gate look: the knob shaft slides through the slots.
 function GatePlate({ activeGear }: { activeGear: string }) {
-  const plateGeo = useMemo(() => {
+  const { plateGeo, wellGeo } = useMemo(() => {
     const w  = 0.011;              // slot half-width (shaft r=0.009 clears it)
     const S  = SLOT + 0.013;       // slot ends extend a touch past gear centers
     const L  = LANE;
@@ -246,9 +261,13 @@ function GatePlate({ activeGear }: { activeGear: string }) {
     h.closePath();
     shape.holes.push(h);
 
-    const geo = new THREE.ExtrudeGeometry(shape, { depth: 0.006, bevelEnabled: true, bevelThickness: 0.0015, bevelSize: 0.0015, bevelSegments: 2 });
-    geo.rotateX(-Math.PI / 2);
-    return geo;
+    const plateGeo = new THREE.ExtrudeGeometry(shape, { depth: 0.006, bevelEnabled: true, bevelThickness: 0.0015, bevelSize: 0.0015, bevelSegments: 2 });
+    plateGeo.rotateX(-Math.PI / 2);
+    // Same outline + holes extruded deeper: the hollow slot well under the
+    // plate. Its inner walls are what you see through the H cutouts.
+    const wellGeo = new THREE.ExtrudeGeometry(shape, { depth: WELL_DEPTH, bevelEnabled: false });
+    wellGeo.rotateX(-Math.PI / 2);
+    return { plateGeo, wellGeo };
   }, []);
 
   // Slot dots — one per gear (except N)
@@ -257,23 +276,32 @@ function GatePlate({ activeGear }: { activeGear: string }) {
   // All positions are gate-local — the parent group applies GATE_CENTER + tilt
   return (
     <group>
-      {/* Brushed-metal plate, top surface just under the knob's collar */}
+      {/* Brushed-metal / matte-composite plate — solid and high-contrast.
+          Low envMapIntensity + moderate metalness keeps it opaque-looking:
+          the old 0.95-metalness surface mirrored the carbon interior and
+          read as washed-out / see-through. */}
       <mesh geometry={plateGeo} position={[0, -0.012, 0]}>
-        <meshStandardMaterial color="#525c68" metalness={0.95} roughness={0.32} envMapIntensity={1.2} />
+        <meshStandardMaterial color="#39414c" metalness={0.6} roughness={0.48} envMapIntensity={0.5} />
       </mesh>
-      {/* Black base skirt — plate footprint slightly inset, top at the plate
-          underside, bottom below the tunnel surface even at the rake-raised
-          front corner (SKIRT_BOT is solved for exactly that), so the wedge
-          under the front edge is filled and the OEM tunnel top is buried. */}
+      {/* Hollow slot well — blacked-out, light-absorbing channel where the
+          shifter travels: the H reads as a dark void cut into the plate */}
+      <mesh geometry={wellGeo} position={[0, WELL_BOT, 0]}>
+        <meshStandardMaterial color="#04060a" metalness={0.1} roughness={0.9} />
+      </mesh>
+      {/* Black base skirt — plate footprint slightly inset, top at the WELL
+          floor (so it never plugs the hollow channels), bottom below the
+          tunnel surface even at the rake-raised front corner (SKIRT_BOT is
+          solved for exactly that), burying the OEM tunnel top. */}
       <mesh position={[-PLATE_XOFF, (SKIRT_TOP + SKIRT_BOT) / 2, 0]}>
         <boxGeometry args={[SKIRT_HX * 2, SKIRT_TOP - SKIRT_BOT, SKIRT_HZ * 2]} />
-        <meshStandardMaterial color="#12161c" metalness={0.6} roughness={0.45} />
+        {/* matches the blacked-out well so the channel floor disappears too */}
+        <meshStandardMaterial color="#04060a" metalness={0.1} roughness={0.9} />
       </mesh>
       {dotPositions.map(g => {
         const isActive = g.gear === activeGear;
         return (
-          // Seated down in the slot channel, like inset LEDs
-          <mesh key={g.gear} position={[g.lx, -0.008, g.lz]}>
+          // Inset LEDs on the well floor — glowing up from inside the slots
+          <mesh key={g.gear} position={[g.lx, WELL_BOT + 0.004, g.lz]}>
             <sphereGeometry args={[isActive ? 0.0045 : 0.003, 8, 8]} />
             <meshStandardMaterial
               color={isActive ? '#00e5ff' : '#00b4d8'}
@@ -299,20 +327,26 @@ function GearLabels({ activeGear }: { activeGear: string }) {
         const zOff = g.lz > 0 ? 0.024 : -0.024;
         return (
           <Html key={g.gear} position={[g.lx, 0.006, g.lz + zOff]} center zIndexRange={[30, 0]}>
+            {/* Backed/outlined chip pinned at the slot terminal — stays
+                legible even over bright specular highlights on the plate */}
             <div
               style={{
                 fontFamily: 'monospace',
                 fontSize: 10,
                 letterSpacing: '0.06em',
                 textTransform: 'uppercase',
-                color:      isActive ? '#00e5ff' : 'rgba(140,225,255,0.85)',
+                padding: '1px 5px',
+                borderRadius: 2,
+                background: 'rgba(4,10,22,0.78)',
+                border: `1px solid ${isActive ? 'rgba(0,229,255,0.65)' : 'rgba(0,180,216,0.28)'}`,
+                color:      isActive ? '#00e5ff' : 'rgba(160,230,255,0.92)',
                 textShadow: isActive
                   ? '0 0 8px #00e5ff, 0 0 16px #00b4d8'
-                  : '0 1px 3px rgba(0,0,0,0.9)',
+                  : '0 1px 2px rgba(0,0,0,0.95)',
                 whiteSpace: 'nowrap',
                 pointerEvents: 'none',
                 userSelect:    'none',
-                transition:    'color 0.25s, text-shadow 0.25s',
+                transition:    'color 0.25s, text-shadow 0.25s, border-color 0.25s',
               }}
             >
               {g.label}
@@ -355,60 +389,42 @@ function GearHUD({
   return (
     <Html position={hudPos} center zIndexRange={[40, 0]}>
       <div ref={wrapRef} style={{ opacity: 0, pointerEvents: 'none' }}>
-        {/* Gear indicator block */}
-        <div style={{
-          display:        'flex',
-          alignItems:     'center',
-          gap:            8,
-          padding:        '5px 10px 5px 8px',
-          background:     'rgba(3,8,20,0.92)',
-          border:         `1px solid ${isNeutral ? 'rgba(0,180,216,0.28)' : 'rgba(0,229,255,0.55)'}`,
-          backdropFilter: 'blur(10px)',
-          boxShadow:      isNeutral ? 'none' : '0 0 18px rgba(0,229,255,0.18)',
-          marginBottom:   3,
-          transition:     'border-color 0.3s, box-shadow 0.3s',
-          userSelect:     'none',
-        }}>
-          {/* Gear number */}
-          <span style={{
-            fontSize:   22,
-            fontWeight: 900,
-            fontFamily: 'monospace',
-            lineHeight: 1,
-            minWidth:   18,
-            textAlign:  'center',
-            color:      isNeutral ? 'rgba(0,180,216,0.38)' : '#00e5ff',
-            textShadow: isNeutral ? 'none' : '0 0 14px #00e5ff, 0 0 30px rgba(0,229,255,0.5)',
-            transition: 'color 0.25s, text-shadow 0.25s',
+        {/* Destination readout — shows the SELECTED SECTION (Home, About…),
+            never gear states; hidden entirely while nothing is engaged */}
+        {!isNeutral && (
+          <div style={{
+            padding:        '6px 12px',
+            background:     'rgba(3,8,20,0.92)',
+            border:         '1px solid rgba(0,229,255,0.55)',
+            backdropFilter: 'blur(10px)',
+            boxShadow:      '0 0 18px rgba(0,229,255,0.18)',
+            marginBottom:   3,
+            textAlign:      'center',
+            userSelect:     'none',
           }}>
-            {activeGear}
-          </span>
-
-          <div style={{ width: 1, height: 26, background: 'rgba(0,180,216,0.2)' }} />
-
-          <div style={{ minWidth: 68 }}>
             <div style={{
               fontFamily:      'monospace',
               fontSize:        7,
-              letterSpacing:   '0.12em',
+              letterSpacing:   '0.14em',
               textTransform:   'uppercase',
-              color:           'rgba(0,180,216,0.5)',
+              color:           'rgba(0,180,216,0.55)',
               marginBottom:    2,
             }}>
-              {def.sub || 'stand by'}
+              {def.sub}
             </div>
             <div style={{
               fontFamily:    'monospace',
-              fontSize:      10,
-              fontWeight:    700,
-              letterSpacing: '0.08em',
+              fontSize:      13,
+              fontWeight:    900,
+              letterSpacing: '0.14em',
               textTransform: 'uppercase',
-              color:         '#dff0ff',
+              color:         '#00e5ff',
+              textShadow:    '0 0 12px rgba(0,229,255,0.6)',
             }}>
               {def.label}
             </div>
           </div>
-        </div>
+        )}
 
         {/* Mute toggle */}
         <button
@@ -590,16 +606,19 @@ function ShifterKnob({
       onPointerEnter={() => { if (knobRef.current) document.body.style.cursor = 'grab'; }}
       onPointerLeave={() => { document.body.style.cursor = ''; }}
     >
-      {/* Base shaft */}
+      {/* Stalk — polished steel so it stays visible against the dark well,
+          running from the knob down through the slot to below the well floor:
+          the knob clearly mounts INTO the gate, not floats above it */}
       <mesh position={[0, -0.036, 0]}>
         <cylinderGeometry args={[0.006, 0.009, 0.072, 12]} />
-        <meshStandardMaterial color="#18202e" metalness={0.92} roughness={0.18} />
+        <meshStandardMaterial color="#9aa5b1" metalness={0.92} roughness={0.22} />
       </mesh>
 
-      {/* Chrome collar ring */}
-      <mesh position={[0, -0.010, 0]}>
-        <cylinderGeometry args={[0.011, 0.011, 0.006, 16]} />
-        <meshStandardMaterial color="#8899aa" metalness={0.95} roughness={0.08} />
+      {/* Slot shoe — dark collar riding ON the plate surface around the slot
+          mouth, anchoring the stalk to the gate as it slides */}
+      <mesh position={[0, -0.0015, 0]}>
+        <cylinderGeometry args={[0.0125, 0.0145, 0.005, 16]} />
+        <meshStandardMaterial color="#1c232e" metalness={0.75} roughness={0.35} />
       </mesh>
 
       {/* Knob sphere */}

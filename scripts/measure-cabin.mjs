@@ -270,15 +270,20 @@ console.log('\nzoomed tunnel map (max y per cell, "  .  " = no verts):');
   const PLATE_UNDERSIDE = -0.0135;
   const PLATE_XOFF = -(PLATE_X0 + PLATE_X1) / 2;
   const SEAT_GAP = SEAT_INNER_R - SEAT_INNER_L;
-  const SC = (0.7 * SEAT_GAP) / (PLATE_X1 - PLATE_X0);
-  const TILT = -Math.PI / 12, C = Math.cos(TILT), SN = Math.sin(TILT);
-  const EMBED = 0.004;
+  const SURFACE_CREST = -0.1635;
+  const SC = (0.55 * SEAT_GAP) / (PLATE_X1 - PLATE_X0);
+  const TILT = -Math.PI / 36, C = Math.cos(TILT), SN = Math.sin(TILT);
+  const EMBED = 0.002;
   const REAR_UNDER_Y = PLATE_UNDERSIDE * C + PLATE_HZ * SN;
   const AX = (SEAT_INNER_L + SEAT_INNER_R) / 2;
-  const AY = TUNNEL_TOP_Y - EMBED - SC * REAR_UNDER_Y;
+  const AY = SURFACE_CREST - EMBED - SC * REAR_UNDER_Y;
   const CX = AX + SC * PLATE_XOFF;
-  const SKIRT_HZ = PLATE_HZ * 0.96;
-  const SKIRT_BOT = ((TUNNEL_TOP_Y - 0.01 - AY) / SC + SKIRT_HZ * SN) / C;
+  const WELL_DEPTH = 0.035, WELL_BOT = PLATE_UNDERSIDE - WELL_DEPTH;
+  const SKIRT_HZ = PLATE_HZ * 0.99;
+  const SKIRT_BOT = Math.min(
+    ((TUNNEL_TOP_Y - 0.01 - AY) / SC + SKIRT_HZ * SN) / C,
+    WELL_BOT - 0.004,
+  );
 
   // World AABB of the tilted plate (8 corners through anchor∘offset∘tilt∘scale)
   const corners = [];
@@ -291,7 +296,7 @@ console.log('\nzoomed tunnel map (max y per cell, "  .  " = no verts):');
     y0: Math.min(...corners.map(c => c[1])), y1: Math.max(...corners.map(c => c[1])),
     z0: Math.min(...corners.map(c => c[2])), z1: Math.max(...corners.map(c => c[2])),
   };
-  console.log(`\nVERIFY gate placement: anchor=(${AX.toFixed(4)}, ${AY.toFixed(4)}, ${TUNNEL_Z}) scale=${SC.toFixed(4)} tilt=-15°`);
+  console.log(`\nVERIFY gate placement: anchor=(${AX.toFixed(4)}, ${AY.toFixed(4)}, ${TUNNEL_Z}) scale=${SC.toFixed(4)} tilt=${(TILT * 180 / Math.PI).toFixed(1)}°`);
   console.log(`  plate world AABB x[${box.x0.toFixed(3)},${box.x1.toFixed(3)}] y[${box.y0.toFixed(3)},${box.y1.toFixed(3)}] z[${box.z0.toFixed(3)},${box.z1.toFixed(3)}]`);
 
   let seatHits = 0, tunnelMaxY = -Infinity, underCount = 0;
@@ -317,7 +322,7 @@ console.log('\nzoomed tunnel map (max y per cell, "  .  " = no verts):');
     ['(b) tunnel surface present under footprint', tunnelMaxY > -0.20 && tunnelMaxY < -0.13, `max tunnel y under plate=${tunnelMaxY.toFixed(4)} (${underCount} verts)`],
     ['(b) skirt bottom below tunnel surface (wedge filled)', skirtFrontBottom <= TUNNEL_TOP_Y - 0.009, `skirt front-bottom y=${skirtFrontBottom.toFixed(4)}`],
     ['(c) plate footprint within flat tunnel patch z∈[0.20,0.44]', box.z0 >= 0.20 && box.z1 <= 0.44, `z[${box.z0.toFixed(3)},${box.z1.toFixed(3)}]`],
-    ['(d) slots parallel to centerline (pitch-only)', true, 'rotation=[-15°,0,0]; roll=yaw=0 by construction'],
+    ['(d) slots parallel to centerline (pitch-only)', true, `rotation=[${(TILT * 180 / Math.PI).toFixed(1)}°,0,0]; roll=yaw=0 by construction`],
   ];
   let ok = true;
   for (const [label, pass, detail] of checks) {
