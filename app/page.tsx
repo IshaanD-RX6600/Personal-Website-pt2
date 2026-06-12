@@ -22,10 +22,12 @@ export default function HomePage() {
   const { pRef, scrollToProgress, lock, unlock } = useScrollProgress();
   const activeSection = useSiteStore(s => s.activeSection);
 
-  // Capability detection — decide once on mount (client only, avoids hydration mismatch)
+  // Capability detection — decide once on mount (client only, avoids hydration mismatch).
+  // The 3D car runs on mobile/touch too (responsive Canvas, capped DPR, pointer-event
+  // controls), so screen size no longer forces the fallback. We only fall back when the
+  // device genuinely can't render it (no WebGL) or the user opted out of motion.
   useEffect(() => {
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const small   = matchMedia('(max-width: 767px), (pointer: coarse) and (max-width: 1023px)').matches;
     const webgl = (() => {
       try {
         const c = document.createElement('canvas');
@@ -34,15 +36,7 @@ export default function HomePage() {
         return false;
       }
     })();
-    // TEMP DEBUG — remove once cause is confirmed
-    console.log('[capability]', {
-      reduced,
-      small,
-      webgl,
-      innerWidth: window.innerWidth,
-      pointer: matchMedia('(pointer: coarse)').matches ? 'coarse' : 'fine',
-    });
-    setMode(reduced || small || !webgl ? 'fallback' : 'full');
+    setMode(reduced || !webgl ? 'fallback' : 'full');
   }, []);
 
   // Freeze page scroll while an overlay panel is open (panel scrolls natively)
