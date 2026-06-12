@@ -34,6 +34,14 @@ export default function HomePage() {
         return false;
       }
     })();
+    // TEMP DEBUG — remove once cause is confirmed
+    console.log('[capability]', {
+      reduced,
+      small,
+      webgl,
+      innerWidth: window.innerWidth,
+      pointer: matchMedia('(pointer: coarse)').matches ? 'coarse' : 'fine',
+    });
     setMode(reduced || small || !webgl ? 'fallback' : 'full');
   }, []);
 

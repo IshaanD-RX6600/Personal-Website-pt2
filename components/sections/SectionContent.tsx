@@ -70,7 +70,19 @@ const PROJECTS: Project[] = [
 
 function Projects() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+        <span className="bp-annotation">{PROJECTS.length} selected builds</span>
+        <a
+          href={LINKS.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bp-btn text-xs px-3 py-2 min-h-[40px] w-full sm:w-auto justify-center text-center"
+        >
+          [ all projects on GitHub → ]
+        </a>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
       {PROJECTS.map((p, i) => (
         <div key={p.title} className="bp-card flex flex-col overflow-hidden">
           <div className="h-36 overflow-hidden bg-black/40 relative shrink-0">
@@ -100,6 +112,7 @@ function Projects() {
           </div>
         </div>
       ))}
+      </div>
     </div>
   );
 }
