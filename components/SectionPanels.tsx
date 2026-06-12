@@ -53,7 +53,7 @@ export default function SectionPanels() {
                   {SECTION_META[activeSection].title}
                 </h2>
               </div>
-              <button className="bp-btn shrink-0" onClick={closeSection}>
+              <button className="bp-btn shrink-0 px-3 py-2 min-h-[40px]" onClick={closeSection}>
                 [ N ] close
               </button>
             </div>

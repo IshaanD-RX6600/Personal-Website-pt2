@@ -98,13 +98,26 @@ function parseDebugCam() {
   return { pos: v(cam), look: v(look), fov: Number(q.get('fov') ?? 50) };
 }
 
+// Waypoint FOVs are authored for a wide desktop viewport. THREE's `fov` is
+// VERTICAL, so on a tall/narrow (portrait phone) screen the horizontal view
+// collapses and the wide car gets cropped off the sides. Re-derive the vertical
+// fov from a fixed horizontal target so framing stays consistent on any aspect.
+const DESIGN_ASPECT = 16 / 9;
+const MAX_FOV = 88; // clamp so extreme portrait widens instead of going fisheye
+function fovForAspect(authoredFov: number, aspect: number) {
+  if (aspect >= DESIGN_ASPECT) return authoredFov;
+  const hFov = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(authoredFov) / 2) * DESIGN_ASPECT);
+  const vFov = 2 * Math.atan(Math.tan(hFov / 2) / aspect);
+  return Math.min(THREE.MathUtils.radToDeg(vFov), MAX_FOV);
+}
+
 function CameraRig({ pRef }: { pRef: React.MutableRefObject<number> }) {
   const { camera } = useThree();
   const smoothPos  = useRef(new THREE.Vector3(2.4, 1.05, 4.4));
   const smoothLook = useRef(new THREE.Vector3(0, 0.28, 0));
   const debug      = useMemo(parseDebugCam, []);
 
-  useFrame((_, dt) => {
+  useFrame((state, dt) => {
     const { pos, look, fov } = debug
       ? { pos: new THREE.Vector3(...debug.pos), look: new THREE.Vector3(...debug.look), fov: debug.fov }
       : samplePath(pRef.current);
@@ -116,7 +129,8 @@ function CameraRig({ pRef }: { pRef: React.MutableRefObject<number> }) {
     camera.lookAt(smoothLook.current);
     const cam = camera as THREE.PerspectiveCamera;
     if (cam.isPerspectiveCamera) {
-      cam.fov = THREE.MathUtils.lerp(cam.fov, fov, a);
+      const targetFov = fovForAspect(fov, state.size.width / state.size.height);
+      cam.fov = THREE.MathUtils.lerp(cam.fov, targetFov, a);
       cam.updateProjectionMatrix();
     }
   });
