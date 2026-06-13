@@ -7,6 +7,7 @@ import { useSiteStore } from '@/stores/useSiteStore';
 import ScrollSections from '@/components/ScrollSections';
 import SectionPanels from '@/components/SectionPanels';
 import MobileFallback from '@/components/MobileFallback';
+import Onboarding from '@/components/Onboarding';
 
 const CarModel = dynamic(() => import('@/components/CarModel'), {
   ssr: false,
@@ -62,6 +63,9 @@ export default function HomePage() {
 
       {/* Gear-shifter section panels */}
       <SectionPanels />
+
+      {/* First-visit instructions (scroll to drive · shift to navigate) */}
+      <Onboarding pRef={pRef} />
     </>
   );
 }

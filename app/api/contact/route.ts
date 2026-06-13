@@ -3,8 +3,10 @@ import { NextResponse } from "next/server";
 // Contact form → Resend (https://resend.com). Uses the REST API directly so
 // no SDK dependency is needed. RESEND_API_KEY lives in .env.local.
 // NOTE: with the sandbox sender (onboarding@resend.dev) Resend only delivers
-// to the account owner's inbox — which is exactly where this should go.
-const TO_EMAIL = "ishaandhiman74@gmail.com";
+// to the Resend account owner's inbox. This MUST match the email that owns the
+// Resend account, otherwise Resend accepts the request but silently drops it.
+// To send anywhere else, verify a domain in Resend and use a From on that domain.
+const TO_EMAIL = "dhimanishaan7@gmail.com";
 
 export async function POST(req: Request) {
   try {

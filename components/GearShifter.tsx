@@ -11,7 +11,6 @@ import { useSiteStore, type SectionId } from '@/stores/useSiteStore';
 // All positions are LOCAL offsets from GATE_CENTER (applied as: world = center + local)
 const LANE        = 0.055; // x-offset between lanes
 const SLOT        = 0.055; // z-offset for engaged gear
-const R_EXT       = 0.042; // additional x-offset for Reverse
 const SNAP_THRESH = SLOT * 0.88;
 const SPRING_K    = 200;
 const DAMPING     = 26;
@@ -30,11 +29,11 @@ const SURFACE_CREST = -0.1635; // highest surface vert under the plate footprint
 const TUNNEL_Z     =  0.30;   // center of that flat patch
 
 // Plate intrinsic extents in gate-local units (must mirror GatePlate's shape)
-const PLATE_X0 = -(LANE + R_EXT + 0.013 + 0.030); // R-spur edge   (-0.140)
+const PLATE_X0 = -(LANE + 0.042);                 // gear-5/6 edge (-0.097)
 const PLATE_X1 =   LANE + 0.042;                  // gear-1/2 edge (+0.097)
 const PLATE_HZ =   SLOT + 0.013 + 0.030;          // z half-extent (±0.098)
 const PLATE_UNDERSIDE = -0.0135;                  // underside local y (mesh y -0.012 − bevel)
-// The plate is x-asymmetric — this local shift centers its bbox on the anchor
+// Symmetric plate — XOFF resolves to 0, kept as a formula so the bbox stays centered
 const PLATE_XOFF = -(PLATE_X0 + PLATE_X1) / 2;
 
 // Derived placement:
@@ -97,7 +96,6 @@ const H_SEGS: [[number, number], [number, number]][] = [
   [[0,     0],          [0,     -SLOT]     ], // center lane → gear 4
   [[-LANE, 0],          [-LANE,  SLOT]     ], // driver-right lane → gear 5
   [[-LANE, 0],          [-LANE, -SLOT]     ], // driver-right lane → gear 6
-  [[-LANE, -SLOT],      [-LANE - R_EXT, -SLOT]], // R extension past gear 6
 ];
 
 // ─── Gear → action config ────────────────────────────────────────────────────
@@ -125,7 +123,6 @@ export const GEARS: GearDef[] = [
   { gear: '4', label: 'Experience', sub: 'work history',  action: { type: 'panel', id: 'experience' }, lx: 0,             lz: -SLOT  },
   { gear: '5', label: 'Skills',     sub: 'tech stack',    action: { type: 'panel', id: 'skills' },   lx: -LANE,           lz:  SLOT  },
   { gear: '6', label: 'Contact',    sub: 'get in touch',  action: { type: 'panel', id: 'contact' },  lx: -LANE,           lz: -SLOT  },
-  { gear: 'R', label: 'Reverse',    sub: 'back to top',   action: { type: 'scroll', to: 0 },         lx: -LANE - R_EXT,   lz: -SLOT  },
 ];
 
 // ─── Math helpers ─────────────────────────────────────────────────────────────
@@ -226,15 +223,14 @@ function GatePlate({ activeGear }: { activeGear: string }) {
     const w  = 0.011;              // slot half-width (shaft r=0.009 clears it)
     const S  = SLOT + 0.013;       // slot ends extend a touch past gear centers
     const L  = LANE;
-    const RXE = LANE + R_EXT + 0.013; // R spur end
     // Shape is built in XY; rotateX(-π/2) maps shape +y → world -z, so z is
-    // negated (n). x is mirrored (m) to put the R spur on -x, matching GEARS
-    // (gears 1/2 on +x = driver's left; THREE fixes hole winding itself).
+    // negated (n). x is mirrored (m) so gears 1/2 land on +x = driver's left,
+    // matching GEARS (THREE fixes hole winding itself).
     const n = (z: number) => -z;
     const m = (x: number) => -x;
 
-    // Outer plate: rounded rectangle
-    const ox0 = -L - 0.042, ox1 = RXE + 0.030;
+    // Outer plate: symmetric rounded rectangle (clears both outer lanes equally)
+    const ox0 = -L - 0.042, ox1 = L + 0.042;
     const oz  = S + 0.030, r = 0.016;
     const shape = new THREE.Shape();
     shape.moveTo(m(ox0 + r), n(oz));
@@ -247,12 +243,11 @@ function GatePlate({ activeGear }: { activeGear: string }) {
     shape.lineTo(m(ox0), n(oz) + r);
     shape.quadraticCurveTo(m(ox0), n(oz), m(ox0 + r), n(oz));
 
-    // Single connected hole tracing the H pattern + R spur
+    // Single connected hole tracing the H pattern (3 lanes × 2 slots)
     const h = new THREE.Path();
     const pts: [number, number][] = [
       [-L - w,  S], [-L + w,  S], [-L + w,  w], [-w,  w], [-w,  S],
       [ w,  S], [ w,  w], [ L - w,  w], [ L - w,  S], [ L + w,  S],
-      [ L + w, -SLOT + w], [RXE, -SLOT + w], [RXE, -SLOT - w], [ L + w, -SLOT - w],
       [ L + w, -S], [ L - w, -S], [ L - w, -w], [ w, -w], [ w, -S],
       [-w, -S], [-w, -w], [-L + w, -w], [-L + w, -S], [-L - w, -S],
     ];
@@ -662,7 +657,6 @@ export function GearShifterFallback({ onSelect }: { onSelect?: (def: GearDef) =>
     { gear: '4', x: COL.C, y: ROW.bot },
     { gear: '5', x: COL.R, y: ROW.top },
     { gear: '6', x: COL.R, y: ROW.bot },
-    { gear: 'R', x: COL.R + 30, y: ROW.bot + 26 },
   ];
 
   const [active, setActive] = useState('N');
@@ -688,15 +682,13 @@ export function GearShifterFallback({ onSelect }: { onSelect?: (def: GearDef) =>
         {[COL.L, COL.C, COL.R].map((x, i) => (
           <line key={i} x1={x} y1={ROW.top} x2={x} y2={ROW.bot} stroke="rgba(0,180,216,0.30)" strokeWidth={1} />
         ))}
-        <line x1={COL.L} y1={ROW.mid} x2={COL.R + 30} y2={ROW.mid} stroke="rgba(0,180,216,0.30)" strokeWidth={1} />
-        <line x1={COL.R} y1={ROW.bot} x2={COL.R + 30} y2={ROW.bot + 26}
-          stroke="rgba(0,180,216,0.22)" strokeWidth={1} strokeDasharray="3 3" />
+        <line x1={COL.L} y1={ROW.mid} x2={COL.R} y2={ROW.mid} stroke="rgba(0,180,216,0.30)" strokeWidth={1} />
 
         {/* Gear slots */}
         {layout.map(({ gear, x, y }) => {
           const def     = GEARS.find(g => g.gear === gear)!;
           const isActive = gear === active;
-          const r        = gear === 'R' ? 13 : 17;
+          const r        = 17;
           return (
             <g key={gear} style={{ cursor: 'pointer' }} onClick={() => handleClick(def)}>
               <circle
@@ -707,7 +699,7 @@ export function GearShifterFallback({ onSelect }: { onSelect?: (def: GearDef) =>
               />
               <text x={x} y={y - 2} textAnchor="middle" dominantBaseline="middle"
                 fill={isActive ? '#00e5ff' : '#00b4d8'}
-                fontSize={gear === 'R' ? 9 : 12}
+                fontSize={12}
                 fontFamily="monospace"
                 fontWeight="700"
                 style={{ filter: isActive ? 'drop-shadow(0 0 4px #00e5ff)' : 'none' }}>
