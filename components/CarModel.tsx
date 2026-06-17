@@ -141,6 +141,11 @@ function CameraRig({ pRef }: { pRef: React.MutableRefObject<number> }) {
 // ─── Car mesh ─────────────────────────────────────────────────────────────
 function CarMesh({ pRef }: { pRef: React.MutableRefObject<number> }) {
   const { scene } = useGLTF(GLB);
+  const { gl }    = useThree();
+  // Max anisotropic filtering the GPU supports (usually 16). Default is 1 (off),
+  // which is why textures viewed at grazing angles — carbon console, floor,
+  // leather — smear into blur. Applied to every texture below.
+  const maxAniso  = useMemo(() => gl.capabilities.getMaxAnisotropy(), [gl]);
   const groupRef  = useRef<THREE.Group>(null);
   const rotY      = useRef(0);
   // Freeze rotation while tuning with the ?cam= debug camera
@@ -192,20 +197,83 @@ function CarMesh({ pRef }: { pRef: React.MutableRefObject<number> }) {
       }
     });
 
-    // Polish materials: glossy black paint
+    // ── Diagnostics (append to URL): tells "culling" apart from "missing geo"
+    //   ?diag=back      → render ONLY backfaces. If the hollow areas fill in,
+    //                     the geometry EXISTS and the issue is front-face
+    //                     culling. If they stay empty, the faces are MISSING.
+    //   ?diag=wire      → wireframe: triangles in the gap ⇒ culling; bare
+    //                     space ⇒ genuinely no geometry there.
+    //   ?diag=normals   → color = normal direction. A panel whose inside and
+    //                     outside read as the SAME color with a hard flip is
+    //                     a flipped-normal / inside-out mesh.
+    //   ?diag=recompute → rebuild normals from winding (test the flip theory;
+    //                     destroys authored smoothing — diagnostic only).
+    const diag = typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('diag')
+      : null;
+
+    // Polish materials: glossy black paint, made to read as SOLID.
+    //  • side=DoubleSide   → back-facing interior polys render instead of
+    //                        culling to a transparent shell (the hollow look)
+    //  • shadowSide        → keep those now-visible backfaces out of self-
+    //                        shadow black if shadows get enabled on <Canvas>
+    //  • envMapIntensity   → at metalness 0.82 the surfaces are lit almost
+    //                        entirely by the <Environment> map; lift it so the
+    //                        enclosed cabin isn't near-black
     c.traverse(obj => {
       const mesh = obj as THREE.Mesh;
       if (!mesh.isMesh) return;
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+
+      if (diag === 'recompute') {
+        mesh.geometry = mesh.geometry.clone(); // never mutate the GLTF cache
+        mesh.geometry.computeVertexNormals();
+      }
+      if (diag === 'normals') {
+        mesh.material = new THREE.MeshNormalMaterial({ side: THREE.DoubleSide });
+        return;
+      }
+
+      const isGlass  = /Window/i.test(mesh.name);  // real glass — keep see-through
+      const isCutout = /Grille/i.test(mesh.name);  // alpha-textured grille holes
+
       (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).forEach(mat => {
+        // ROOT CAUSE of the "hollow" look: this GLB exports nearly every
+        // material with alphaMode=BLEND — all 22 are flagged transparent in
+        // the source (run scripts/inspect-materials.mjs), including solid
+        // carbon/leather/plastic with baseColor alpha=1. A transparent
+        // material renders in the back-to-front blended pass and lets you see
+        // straight through it to the backfaces behind — THAT is the hollow
+        // shell, not backface culling (every material is already DoubleSide
+        // in the source). Force everything opaque except the actual glass and
+        // the alpha-cutout grille.
+        if (!isGlass && !isCutout && mat.transparent) {
+          mat.transparent = false;
+          mat.depthWrite  = true;
+        }
         if (mat instanceof THREE.MeshStandardMaterial) {
           mat.roughness = 0.30;
           mat.metalness = 0.82;
-          mat.needsUpdate = true;
+          mat.envMapIntensity = 1.0;
+          mat.shadowSide = THREE.DoubleSide;
+          mat.wireframe = diag === 'wire';
+          // The interior texture bakes the glowing badge / dash screen / gauges
+          // as EMISSIVE at KHR strength ~3 (lights at ~4) — at close range that
+          // clips to a featureless white blob and feeds bloom. Cap it so the
+          // lettering keeps its detail and reads as backlit chrome, not a flare.
+          if (mat.emissiveIntensity > 1.2) mat.emissiveIntensity = 1.2;
+          // Crisp textures at grazing angles (carbon, floor, leather)
+          for (const tex of [mat.map, mat.normalMap, mat.roughnessMap, mat.metalnessMap, mat.emissiveMap, mat.aoMap]) {
+            if (tex && tex.anisotropy !== maxAniso) { tex.anisotropy = maxAniso; tex.needsUpdate = true; }
+          }
         }
+        mat.side = diag === 'back' ? THREE.BackSide : THREE.DoubleSide;
+        mat.needsUpdate = true;
       });
     });
     return c;
-  }, [scene]);
+  }, [scene, maxAniso]);
 
   useFrame((_, dt) => {
     if (!groupRef.current) return;
@@ -254,10 +322,19 @@ function Scene({
     <Suspense fallback={null}>
       {/* Opaque background — EffectComposer + transparent canvas causes alpha fringing */}
       <color attach="background" args={['#0a1628']} />
-      <Environment preset="warehouse" background={false} />
+      {/* IBL: the metallic cabin surfaces read almost entirely off this map.
+          environmentIntensity lifts the enclosed interior out of near-black
+          without washing out the studio key/fill spots below. */}
+      <Environment preset="warehouse" background={false} environmentIntensity={0.85} />
 
       {/* Ambient rim light — cool blue tint */}
-      <ambientLight intensity={0.55} color="#a0b8d8" />
+      <ambientLight intensity={0.5} color="#a0b8d8" />
+      {/* Hemisphere fill — soft sky/ground gradient that reaches up into the
+          cabin roof and down across the seats so interior faces aren't flat-dark */}
+      <hemisphereLight args={['#bcd3f0', '#202830', 0.45]} />
+      {/* Interior bounce — a dim fill sitting inside the cabin so console,
+          dash and door cards stay readable in the tight driver-POV framing */}
+      <pointLight position={[0, 0.1, 0.4]} intensity={0.6} color="#cfe2ff" distance={3} decay={2} />
 
       {/* Key: overhead front-right */}
       <spotLight position={[4, 8, 6]}   angle={0.22} penumbra={1} intensity={7}   color="#ffffff" castShadow />
@@ -275,9 +352,14 @@ function Scene({
       <GearShifter pRef={pRef} onNavScroll={onNavScroll} />
       <ModelReady onReady={onModelReady} />
 
-      {/* High threshold: only the emissive cyan accents (knob ring, gate dots) bloom */}
-      <EffectComposer multisampling={0}>
-        <Bloom intensity={0.35} luminanceThreshold={0.85} luminanceSmoothing={0.2} mipmapBlur />
+      {/* multisampling={4}: MSAA in the composer so edges stay crisp (the
+          Canvas `antialias` is bypassed once we render through EffectComposer).
+          Bloom threshold raised to 1.0 + lower intensity so ONLY the emissive
+          cyan accents bloom — the bright metal reflections no longer smear a
+          haze over the cabin (that was the "blurry" look). 0.9 (not 1.0) keeps
+          the accent glow alive under r3f's default ACES tone mapping. */}
+      <EffectComposer multisampling={4}>
+        <Bloom intensity={0.25} luminanceThreshold={0.9} luminanceSmoothing={0.1} mipmapBlur />
       </EffectComposer>
     </Suspense>
   );
@@ -308,8 +390,8 @@ export default function CarModel({
       >
         <Canvas
           camera={{ position: [2.4, 1.05, 4.4], fov: 42 }}
-          gl={{ antialias: true, alpha: true }}
-          dpr={[1, 1.5]}
+          gl={{ antialias: true, alpha: true, toneMappingExposure: 0.9 }}
+          dpr={[1, 2]}
           style={{ background: 'transparent', width: '100%', height: '100%' }}
         >
           <Scene pRef={pRef} onNavScroll={onNavScroll} onModelReady={() => setReady(true)} />
