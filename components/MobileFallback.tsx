@@ -1,6 +1,5 @@
 "use client";
 
-import { GearShifterFallback } from './GearShifter';
 import { SECTION_META, SectionBody } from './sections/SectionContent';
 import type { SectionId } from '@/stores/useSiteStore';
 
@@ -9,8 +8,8 @@ const SECTION_ORDER: SectionId[] = ['projects', 'experience', 'skills', 'contact
 /**
  * Plain stacked-scroll version of the site.
  * Served on small screens, when WebGL is unavailable, and for
- * prefers-reduced-motion. The SVG H-pattern shifter doubles as a
- * jump-to-section nav via in-page anchors.
+ * prefers-reduced-motion. Garage "bay" buttons jump to each section
+ * via in-page anchors.
  */
 export default function MobileFallback() {
   return (
@@ -27,9 +26,19 @@ export default function MobileFallback() {
         <p className="mt-4 text-muted-foreground max-w-md text-sm sm:text-base">
           I build fast, beautiful things for the web.
         </p>
-        <div className="mt-10">
-          <GearShifterFallback />
-        </div>
+        {/* Bay nav — mirrors the wall panels of the 3D garage */}
+        <nav className="mt-10 grid grid-cols-2 gap-3 w-full max-w-sm">
+          {SECTION_ORDER.map(id => (
+            <button
+              key={id}
+              className="bp-btn px-4 py-3 text-left"
+              onClick={() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              <span className="bp-annotation block">bay {SECTION_META[id].bay}</span>
+              <span className="text-sm font-black text-foreground">{SECTION_META[id].title}</span>
+            </button>
+          ))}
+        </nav>
       </header>
 
       {/* ── About ── */}
@@ -50,7 +59,7 @@ export default function MobileFallback() {
       {SECTION_ORDER.map(id => (
         <section key={id} id={id} className="max-w-3xl mx-auto px-6 py-16 scroll-mt-8">
           <div className="bp-annotation mb-1">
-            gear {SECTION_META[id].gear} · {SECTION_META[id].label}
+            bay {SECTION_META[id].bay} · {SECTION_META[id].label}
           </div>
           <h2
             className="text-2xl font-black text-foreground mb-6"

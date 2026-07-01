@@ -14,12 +14,14 @@ const CarModel = dynamic(() => import('@/components/CarModel'), {
 });
 
 // Total scrollable height driving the 0→1 camera timeline.
-// Bigger = slower, more deliberate scrub. Tune 500–700vh to taste.
-const TIMELINE_HEIGHT = '600vh';
+// Bigger = slower, more deliberate scrub. Each section car owns ~15% of the
+// timeline (see WP in CarModel.tsx), so at 1800vh a single car's stop takes
+// ~2.5 screens of scrolling — a deliberately slow showroom walk.
+const TIMELINE_HEIGHT = '1800vh';
 
 export default function HomePage() {
   const [mode, setMode] = useState<'loading' | 'full' | 'fallback'>('loading');
-  const { pRef, scrollToProgress, lock, unlock } = useScrollProgress();
+  const { pRef, lock, unlock } = useScrollProgress();
   const activeSection = useSiteStore(s => s.activeSection);
 
   // Capability detection — decide once on mount (client only, avoids hydration mismatch).
@@ -51,7 +53,7 @@ export default function HomePage() {
     <>
       {/* 3D scene — fixed, scrubbed by scroll via pRef */}
       <div className="fixed inset-0 z-0">
-        <CarModel pRef={pRef} onNavScroll={scrollToProgress} />
+        <CarModel pRef={pRef} />
       </div>
 
       {/* Hero / About overlays, scroll-linked */}
@@ -60,7 +62,7 @@ export default function HomePage() {
       {/* The only in-flow element: gives the page its scrollable timeline */}
       <div style={{ height: TIMELINE_HEIGHT }} aria-hidden />
 
-      {/* Gear-shifter section panels */}
+      {/* Wall-panel section overlays */}
       <SectionPanels />
     </>
   );

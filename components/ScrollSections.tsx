@@ -3,12 +3,13 @@
 import { useEffect, useRef } from 'react';
 
 /**
- * Scroll-linked HTML overlays for the 3D timeline (hero + about).
+ * Scroll-linked HTML overlays for the 3D garage timeline (hero + about + nav hint).
  * Opacity is written imperatively from pRef in one rAF loop — zero re-renders.
  *
  * Visibility ranges (p = normalized scroll, matches WP keyframes in CarModel):
- *   Hero:  in 0.00→0.02, out 0.14→0.20  (gone before the cabin fly-in)
- *   About: in 0.24→0.30, out 0.44→0.50  (lives during the fly-in phase)
+ *   Hero:  in at top, out 0.06→0.11   (gone as the garage door starts lifting)
+ *   About: in 0.29→0.35, out 0.39→0.44 (the aisle glide, before the car stops)
+ *   Hint:  in 0.93→0.98, holds to the end (the parked cars = nav)
  */
 
 // Linear fade-in over [in0,in1], hold at 1, fade-out over [out0,out1]
@@ -23,6 +24,7 @@ function ramp(p: number, in0: number, in1: number, out0: number, out1: number) {
 export default function ScrollSections({ pRef }: { pRef: React.MutableRefObject<number> }) {
   const heroRef  = useRef<HTMLDivElement>(null);
   const aboutRef = useRef<HTMLDivElement>(null);
+  const hintRef  = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let raf = 0;
@@ -31,16 +33,23 @@ export default function ScrollSections({ pRef }: { pRef: React.MutableRefObject<
 
       if (heroRef.current) {
         // in0 = -1: fully visible at the very top (ramp(0, 0, …) would be 0)
-        const o = ramp(p, -1, 0, 0.14, 0.2);
+        const o = ramp(p, -1, 0, 0.06, 0.11);
         heroRef.current.style.opacity = String(o);
         heroRef.current.style.visibility = o > 0.01 ? 'visible' : 'hidden';
       }
       if (aboutRef.current) {
-        const o = ramp(p, 0.24, 0.3, 0.44, 0.5);
+        const o = ramp(p, 0.29, 0.35, 0.39, 0.44);
         aboutRef.current.style.opacity = String(o);
         aboutRef.current.style.visibility = o > 0.01 ? 'visible' : 'hidden';
-        // Slight parallax drift while in range
-        aboutRef.current.style.transform = `translateY(${(0.37 - p) * 120}px)`;
+        // Slight parallax drift while in range. Keep the -50% vertical centering
+        // (Tailwind's -translate-y-1/2 lives on `transform`, which we overwrite here).
+        aboutRef.current.style.transform = `translateY(calc(-50% + ${(0.365 - p) * 200}px))`;
+      }
+      if (hintRef.current) {
+        // out0=2: never fades back out — holds through the end of the timeline
+        const o = ramp(p, 0.93, 0.98, 2, 3);
+        hintRef.current.style.opacity = String(o);
+        hintRef.current.style.visibility = o > 0.01 ? 'visible' : 'hidden';
       }
 
       raf = requestAnimationFrame(tick);
@@ -56,15 +65,22 @@ export default function ScrollSections({ pRef }: { pRef: React.MutableRefObject<
         <div className="bp-annotation mb-3">full stack developer</div>
         <h1
           className="text-5xl sm:text-7xl font-black tracking-tight text-foreground"
-          style={{ fontFamily: 'var(--font-poppins)' }}
+          style={{
+            fontFamily: 'var(--font-poppins)',
+            // Legible over the bright daytime sky
+            textShadow: '0 2px 20px rgba(4,16,32,0.65), 0 1px 3px rgba(4,16,32,0.8)',
+          }}
         >
           Ishaan Dhiman
         </h1>
-        <p className="mt-4 text-muted-foreground max-w-md mx-auto text-sm sm:text-base">
+        <p
+          className="mt-4 text-muted-foreground max-w-md mx-auto text-sm sm:text-base"
+          style={{ textShadow: '0 1px 10px rgba(4,16,32,0.7), 0 1px 2px rgba(4,16,32,0.85)' }}
+        >
           I build fast, beautiful things for the web.
         </p>
         <div className="absolute left-1/2 -translate-x-1/2 top-[68vh] bp-annotation animate-bounce">
-          scroll ↓
+          scroll to open the garage ↓
         </div>
       </div>
 
@@ -77,7 +93,7 @@ export default function ScrollSections({ pRef }: { pRef: React.MutableRefObject<
         <div className="bp-card p-6 sm:p-8">
           <div className="bp-label mb-3">About</div>
           <h2 className="text-2xl font-black text-foreground mb-3" style={{ fontFamily: 'var(--font-poppins)' }}>
-            Get in. Buckle up.
+            Welcome to the garage.
           </h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             I&apos;m a high school developer passionate about building AI tools,
@@ -96,8 +112,17 @@ export default function ScrollSections({ pRef }: { pRef: React.MutableRefObject<
               <div className="bp-annotation">Hackathons</div>
             </div>
           </div>
-          <div className="bp-annotation mt-4">keep scrolling → cockpit · shifter = nav</div>
+          <div className="bp-annotation mt-4">keep scrolling → around the car · the parked cars = nav</div>
         </div>
+      </div>
+
+      {/* ── Nav hint (showroom finale) ── */}
+      <div
+        ref={hintRef}
+        className="absolute inset-x-0 bottom-[6vh] text-center"
+        style={{ opacity: 0 }}
+      >
+        <span className="bp-annotation">click a parked car to open its section</span>
       </div>
     </div>
   );

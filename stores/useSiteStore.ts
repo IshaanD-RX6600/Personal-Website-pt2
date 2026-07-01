@@ -5,22 +5,17 @@ export type SectionId = 'projects' | 'experience' | 'skills' | 'contact';
 interface SiteState {
   /** Which overlay panel is open (null = none) */
   activeSection: SectionId | null;
-  /** Currently engaged gear — mirrors the 3D knob ('N','1'–'6','R') */
-  gear: string;
-  openSection: (id: SectionId, gear: string) => void;
-  /** Closes any open panel and returns the knob to Neutral */
+  /** Opened by clicking a garage wall panel in the 3D scene */
+  openSection: (id: SectionId) => void;
   closeSection: () => void;
-  setGear: (g: string) => void;
 }
 
 // Works on both sides of the R3F renderer boundary: React components
 // subscribe via the hook; useFrame code reads useSiteStore.getState().
 export const useSiteStore = create<SiteState>((set) => ({
   activeSection: null,
-  gear: 'N',
-  openSection: (id, gear) => set({ activeSection: id, gear }),
-  closeSection: () => set({ activeSection: null, gear: 'N' }),
-  setGear: (g) => set({ gear: g }),
+  openSection: (id) => set({ activeSection: id }),
+  closeSection: () => set({ activeSection: null }),
 }));
 
 // Dev-only handle for smoke tests / console debugging

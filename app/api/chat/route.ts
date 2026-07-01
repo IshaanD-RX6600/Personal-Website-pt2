@@ -5,8 +5,13 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { message, history } = body;
+    const { message } = body;
+    const history = Array.isArray(body.history) ? body.history : [];
     const apiKey = process.env.GOOGLE_API_KEY;
+
+    if (!message || typeof message !== 'string') {
+      return NextResponse.json({ error: "Message is required" }, { status: 400 });
+    }
 
     if (!apiKey) {
       console.error("API key is missing");

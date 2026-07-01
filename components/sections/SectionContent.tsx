@@ -6,11 +6,11 @@ import type { SectionId } from '@/stores/useSiteStore';
 // Shared by SectionPanels (3D overlay mode) and MobileFallback (stacked mode).
 // Content ported from the previous site (about/projects/contact pages).
 
-export const SECTION_META: Record<SectionId, { gear: string; title: string; label: string }> = {
-  projects:   { gear: '3', title: 'Projects',   label: 'built work'    },
-  experience: { gear: '4', title: 'Experience', label: 'work history'  },
-  skills:     { gear: '5', title: 'Skills',     label: 'tech stack'    },
-  contact:    { gear: '6', title: 'Contact',    label: 'get in touch'  },
+export const SECTION_META: Record<SectionId, { bay: string; title: string; label: string }> = {
+  projects:   { bay: '01', title: 'Projects',   label: 'built work'    },
+  experience: { bay: '02', title: 'Experience', label: 'work history'  },
+  skills:     { bay: '03', title: 'Skills',     label: 'tech stack'    },
+  contact:    { bay: '04', title: 'Contact',    label: 'get in touch'  },
 };
 
 export const LINKS = {

@@ -6,7 +6,7 @@ import { useSiteStore } from '@/stores/useSiteStore';
 import { SECTION_META, SectionBody } from './sections/SectionContent';
 
 /**
- * Full-screen overlay panels opened by the 3D gear shifter.
+ * Full-screen overlay panels opened by the garage wall panels in the 3D scene.
  * Unmounted entirely when closed, so they never block canvas pointer events.
  */
 export default function SectionPanels() {
@@ -47,14 +47,14 @@ export default function SectionPanels() {
             <div className="flex items-start justify-between gap-4 mb-6">
               <div>
                 <div className="bp-annotation mb-1">
-                  gear {SECTION_META[activeSection].gear} · {SECTION_META[activeSection].label}
+                  bay {SECTION_META[activeSection].bay} · {SECTION_META[activeSection].label}
                 </div>
                 <h2 className="text-2xl font-black text-foreground" style={{ fontFamily: 'var(--font-poppins)' }}>
                   {SECTION_META[activeSection].title}
                 </h2>
               </div>
               <button className="bp-btn shrink-0 px-3 py-2 min-h-[40px]" onClick={closeSection}>
-                [ N ] close
+                [ esc ] close
               </button>
             </div>
 
