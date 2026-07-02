@@ -4,6 +4,7 @@ import { Suspense, useMemo, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, Html } from '@react-three/drei';
 import * as THREE from 'three';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { useSiteStore, type SectionId } from '@/stores/useSiteStore';
 
 /**
@@ -126,21 +127,14 @@ export function GarageDoor({ pRef }: { pRef: React.MutableRefObject<number> }) {
         <meshStandardMaterial color="#00b4d8" emissive="#00b4d8" emissiveIntensity={1.2} />
       </mesh>
 
-      {/* Asphalt apron outside — daylight grey, fades into the horizon haze */}
-      <mesh position={[0, FLOOR_Y - 0.002, 6]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[70, 40]} />
-        <meshStandardMaterial color="#454c58" roughness={0.95} metalness={0} />
+      {/* Lawn — sits 6cm below the floor line so the street model renders on
+          top of it; this is the green ground beside/behind the garage and
+          past the road's edges, dressed by <Greenery /> and fading into the
+          horizon haze */}
+      <mesh position={[0, FLOOR_Y - 0.06, 20]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[160, 120]} />
+        <meshStandardMaterial color="#587f48" roughness={1} metalness={0} />
       </mesh>
-      {/* Runway guide lights down the apron — lead the eye out through the
-          open door at the showroom finale (and toward it on the way in) */}
-      {Array.from({ length: 5 }, (_, i) =>
-        [-4.0, 4.0].map(x => (
-          <mesh key={`${x}:${i}`} position={[x, FLOOR_Y + 0.03, 1.2 + i * 1.6]}>
-            <sphereGeometry args={[0.04, 10, 10]} />
-            <meshStandardMaterial color="#00b4d8" emissive="#00b4d8" emissiveIntensity={2.2} />
-          </mesh>
-        ))
-      )}
     </group>
   );
 }
@@ -237,6 +231,259 @@ export function GarageModel() {
 }
 
 useGLTF.preload(GARAGE_GLB);
+
+// ─── Street outside the garage ──────────────────────────────────────────────
+// road__avenue__street.glb: a 1000×1500 textured avenue. Probed in
+// scripts/probe-road-slope.mjs: the drivable LANE is the plot's LOWEST
+// surface — dead flat at raw y=-5 across the whole center strip (|x|<250) —
+// flanked by raised platforms (y 11..15) carrying the striped barriers out
+// at |x|≥300. Align the lane to the garage floor: the door opens straight
+// onto asphalt, with the barrier platforms rising ~1 unit off to the sides.
+const ROAD_GLB = '/road__avenue__street.glb';
+const ROAD_SCALE = 0.05;
+const ROAD_TOP = -5;     // raw height of the road lane
+
+export function RoadModel() {
+  const { scene } = useGLTF(ROAD_GLB);
+  const { gl } = useThree();
+  const maxAniso = useMemo(() => gl.capabilities.getMaxAnisotropy(), [gl]);
+
+  const model = useMemo(() => {
+    const c = scene.clone(true);
+    c.traverse(obj => {
+      const mesh = obj as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).forEach(m => {
+        const mat = m as THREE.MeshStandardMaterial;
+        // Parts of the plot (the lane stretch near the garage) have flipped
+        // normals and vanish from above unless both faces render
+        mat.side = THREE.DoubleSide;
+        if (mat.isMeshStandardMaterial) {
+          for (const tex of [mat.map, mat.normalMap, mat.roughnessMap, mat.aoMap]) {
+            if (tex && tex.anisotropy !== maxAniso) { tex.anisotropy = maxAniso; tex.needsUpdate = true; }
+          }
+        }
+        mat.needsUpdate = true;
+      });
+    });
+    return c;
+  }, [scene, maxAniso]);
+
+  // Long axis (raw z, 1500 units) runs down world +z — away from the door.
+  // The plot starts at the door line (so it never overlaps the garage floor)
+  // and the lane sits 4mm below the floor plane — an invisible step that
+  // avoids any z-fighting at the threshold.
+  return (
+    <primitive
+      object={model}
+      position={[0, FLOOR_Y - 0.004 - ROAD_TOP * ROAD_SCALE, 6 + 750 * ROAD_SCALE]}
+      scale={ROAD_SCALE}
+      dispose={null}
+    />
+  );
+}
+
+// ─── Greenery — grass tufts + trees on the lawn ─────────────────────────────
+// patch_of_grass.glb ships ~9k SEPARATE 8-triangle blade meshes (one draw
+// call each = unusable). All blades get merged into a single geometry at
+// load, then that one mesh is instanced by hand at a dozen spots. The soil
+// base plate is dropped — tufts sit straight on the lawn plane.
+// trees_low_poly.glb carries two distinct trees (tree4, tree6): each is
+// extracted, re-centered onto its trunk base, and cloned across the spots.
+const GRASS_GLB = '/patch_of_grass.glb';
+const TREES_GLB = '/trees_low_poly.glb';
+const LAWN_Y = FLOOR_Y - 0.06;
+
+// Field zones to blanket with tufts: [x0, x1, z0, z1]. Everything beside and
+// behind the garage plus the strips flanking the road — never the door
+// corridor, the garage footprint, or the road plot itself.
+const GRASS_ZONES: [number, number, number, number][] = [
+  [-36,  -7, -20, 5.5],   // left of the garage
+  [  7,  36, -20, 5.5],   // right of the garage
+  [ -5,   5, -20, -10],   // behind the garage
+  [-39, -27,   7,  48],   // left of the road
+  [ 27,  39,   7,  48],   // right of the road
+];
+const GRASS_STEP = 4.4;   // tuft grid spacing (tufts are ~6.5 wide → overlap)
+// [kind, x, z, scale, yaw]
+const TREE_SPOTS: ['tree4' | 'tree6', number, number, number, number][] = [
+  ['tree4', -8.5,  5.5, 0.0032, 0.4], ['tree6',  9.0,  5.0, 0.0040, 2.1],
+  ['tree6', -11.0, -2.0, 0.0036, 1.2], ['tree4', 12.0, -3.0, 0.0028, 3.6],
+  ['tree4', -9.5, -11.0, 0.0030, 5.0], ['tree6', 10.5, -12.0, 0.0038, 0.9],
+  ['tree6', -28.5, 18, 0.0042, 2.8], ['tree4', 28.5, 22, 0.0034, 4.4],
+  ['tree4', -29.5, 38, 0.0030, 1.7], ['tree6', 30.0, 42, 0.0040, 5.6],
+];
+
+function GrassField() {
+  const { scene } = useGLTF(GRASS_GLB);
+  const { gl } = useThree();
+  const maxAniso = useMemo(() => gl.capabilities.getMaxAnisotropy(), [gl]);
+
+  const merged = useMemo(() => {
+    scene.updateMatrixWorld(true);
+    const geos: THREE.BufferGeometry[] = [];
+    let mat: THREE.MeshStandardMaterial | null = null;
+    // Optimization + shape: keep every 4th blade (~9k source meshes is far
+    // denser than needed) and only blades inside an 85-unit disc of the plot
+    // center — the merged tuft comes out round, so overlapping instances
+    // tile into a continuous field with no straight seams.
+    const DISC_R2 = 85 * 85;
+    let i = 0;
+    scene.traverse(obj => {
+      const mesh = obj as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      const m = mesh.material as THREE.MeshStandardMaterial;
+      if (m.name !== 'grass') return; // skip the Soil base plate
+      mat = m;
+      if (i++ % 4 !== 0) return;
+      const e = mesh.matrixWorld.elements;
+      if (e[12] * e[12] + e[14] * e[14] > DISC_R2) return;
+      geos.push(mesh.geometry.clone().applyMatrix4(mesh.matrixWorld));
+    });
+    if (!geos.length || !mat) return null;
+    const geo = mergeGeometries(geos, false);
+    geos.forEach(g => g.dispose());
+    if (!geo) return null;
+    const material = mat as THREE.MeshStandardMaterial;
+    material.side = THREE.DoubleSide; // blade cards read from both sides
+    // Tint the neon blade texture down toward the lawn hue so the field
+    // blends with the ground plane peeking through between blades
+    material.color.set('#c2d0a6');
+    if (material.map && material.map.anisotropy !== maxAniso) {
+      material.map.anisotropy = maxAniso;
+      material.map.needsUpdate = true;
+    }
+    return { geo, material };
+  }, [scene, maxAniso]);
+
+  // Blanket the zones with one InstancedMesh: a jittered grid of tufts,
+  // stretched wide in XZ (coverage) but kept short in Y (ankle-height
+  // blades) via non-uniform scale — the whole field is a single draw call.
+  const field = useMemo(() => {
+    if (!merged) return null;
+    const spots: { x: number; z: number; ry: number; s: number; sy: number }[] = [];
+    let n = 0;
+    for (const [x0, x1, z0, z1] of GRASS_ZONES) {
+      for (let x = x0; x <= x1; x += GRASS_STEP) {
+        for (let z = z0; z <= z1; z += GRASS_STEP) {
+          // Deterministic jitter/variation from the index (no Math.random —
+          // layout must be identical every mount)
+          const h = (n * 2654435761) % 1000;
+          spots.push({
+            x: x + ((h % 30) / 30 - 0.5) * 2.4,
+            z: z + (((h >> 3) % 30) / 30 - 0.5) * 2.4,
+            ry: (h % 63) / 10,
+            s: 0.036 + (h % 11) * 0.001,   // footprint ~6.1..7.9 wide
+            sy: 0.011 + (h % 7) * 0.001,   // blades ~0.14..0.21 tall
+          });
+          n++;
+        }
+      }
+    }
+    const im = new THREE.InstancedMesh(merged.geo, merged.material, spots.length);
+    const m4 = new THREE.Matrix4();
+    const q = new THREE.Quaternion();
+    const eu = new THREE.Euler();
+    const p = new THREE.Vector3();
+    const sc = new THREE.Vector3();
+    spots.forEach((sp, i) => {
+      eu.set(0, sp.ry, 0);
+      q.setFromEuler(eu);
+      // sunk a hair so blade bases never float above the lawn
+      m4.compose(p.set(sp.x, LAWN_Y - 0.005, sp.z), q, sc.set(sp.s, sp.sy, sp.s));
+      im.setMatrixAt(i, m4);
+    });
+    im.instanceMatrix.needsUpdate = true;
+    // InstancedMesh culls by the BASE geometry's bounds (one tuft at the
+    // origin), which would blink the whole field off-screen — disable it
+    im.frustumCulled = false;
+    return im;
+  }, [merged]);
+
+  return field ? <primitive object={field} /> : null;
+}
+
+function Trees() {
+  const { scene } = useGLTF(TREES_GLB);
+  const { gl } = useThree();
+  const maxAniso = useMemo(() => gl.capabilities.getMaxAnisotropy(), [gl]);
+
+  const templates = useMemo(() => {
+    const src = scene.clone(true);
+    src.updateMatrixWorld(true);
+    src.traverse(obj => {
+      const mesh = obj as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).forEach(m => {
+        const mat = m as THREE.MeshStandardMaterial;
+        // Leaf cards export as alpha-BLEND: switch to alpha-test so
+        // overlapping canopies don't sort against each other (and the sky)
+        if (/leaves/i.test(mat.name)) {
+          mat.alphaTest = 0.35;
+          mat.depthWrite = true;
+        }
+        mat.side = THREE.DoubleSide;
+        if (mat.isMeshStandardMaterial && mat.map && mat.map.anisotropy !== maxAniso) {
+          mat.map.anisotropy = maxAniso;
+          mat.map.needsUpdate = true;
+        }
+        mat.needsUpdate = true;
+      });
+    });
+    const extract = (name: string) => {
+      const node = src.getObjectByName(name);
+      if (!node) return null;
+      // Re-parent at identity keeping the world transform, then shift the
+      // trunk base to the local origin so placement is just [x, LAWN_Y, z]
+      const holder = new THREE.Group();
+      holder.attach(node);
+      const box = new THREE.Box3().setFromObject(node);
+      const ctr = box.getCenter(new THREE.Vector3());
+      node.position.x -= ctr.x;
+      node.position.z -= ctr.z;
+      node.position.y -= box.min.y;
+      return holder;
+    };
+    return { tree4: extract('tree4'), tree6: extract('tree6') };
+  }, [scene, maxAniso]);
+
+  // One clone per spot (clones share geometry/materials — cheap). Built in
+  // a single memo: hooks can't live inside the render loop below.
+  const instances = useMemo(
+    () => TREE_SPOTS.map(([kind, x, z, s, ry]) => {
+      const tpl = templates[kind];
+      return tpl ? { obj: tpl.clone(true), x, z, s, ry } : null;
+    }),
+    [templates],
+  );
+
+  return (
+    <>
+      {instances.map((it, i) => it && (
+        <primitive
+          key={i}
+          object={it.obj}
+          position={[it.x, LAWN_Y, it.z]}
+          rotation={[0, it.ry, 0]}
+          scale={it.s}
+        />
+      ))}
+    </>
+  );
+}
+
+export function Greenery() {
+  return (
+    <>
+      <Suspense fallback={null}>
+        <GrassField />
+      </Suspense>
+      <Suspense fallback={null}>
+        <Trees />
+      </Suspense>
+    </>
+  );
+}
 
 // ─── Section cars — the navigation ──────────────────────────────────────────
 // One car per section, parked PERPENDICULAR to the side walls (tail to the

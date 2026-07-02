@@ -23,8 +23,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Preload the GLB so the browser fetches it in parallel with JS */}
-        <link rel="preload" href="/car.glb" as="fetch" crossOrigin="anonymous" />
+        {/* Preload the garage GLB (the only load-blocking model) so the
+            browser fetches it in parallel with JS */}
+        <link rel="preload" href="/car_garage.glb" as="fetch" crossOrigin="anonymous" />
       </head>
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>

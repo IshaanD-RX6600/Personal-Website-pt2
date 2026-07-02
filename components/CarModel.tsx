@@ -4,7 +4,7 @@ import { Suspense, useEffect, useRef, useMemo, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Environment, useProgress, Sky, Clouds, Cloud } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
-import { GarageModel, GarageDoor, EdgeCars, DOOR_Z } from './Garage';
+import { GarageModel, GarageDoor, EdgeCars, RoadModel, Greenery, DOOR_Z } from './Garage';
 import * as THREE from 'three';
 
 // ─── Camera path waypoints — THE scroll choreography tuning surface ────────
@@ -191,6 +191,12 @@ function Scene({
       <GarageModel />
       <GarageDoor pRef={pRef} />
       <EdgeCars pRef={pRef} />
+      {/* Street outside — 15MB of texture, streams in behind the main scene */}
+      <Suspense fallback={null}>
+        <RoadModel />
+      </Suspense>
+      {/* Grass tufts + trees on the lawn (lazy, own inner Suspense per model) */}
+      <Greenery />
       <ModelReady onReady={onModelReady} />
 
       {/* multisampling={4}: MSAA in the composer so edges stay crisp (the

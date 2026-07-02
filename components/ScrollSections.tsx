@@ -21,7 +21,14 @@ function ramp(p: number, in0: number, in1: number, out0: number, out1: number) {
   return 0;
 }
 
-export default function ScrollSections({ pRef }: { pRef: React.MutableRefObject<number> }) {
+export default function ScrollSections({
+  pRef,
+  onRestart,
+}: {
+  pRef: React.MutableRefObject<number>;
+  /** Smooth-scrolls the timeline back to p=0 (the closed garage door) */
+  onRestart: () => void;
+}) {
   const heroRef  = useRef<HTMLDivElement>(null);
   const aboutRef = useRef<HTMLDivElement>(null);
   const hintRef  = useRef<HTMLDivElement>(null);
@@ -116,13 +123,20 @@ export default function ScrollSections({ pRef }: { pRef: React.MutableRefObject<
         </div>
       </div>
 
-      {/* ── Nav hint (showroom finale) ── */}
+      {/* ── Nav hint + restart (showroom finale) ── */}
       <div
         ref={hintRef}
-        className="absolute inset-x-0 bottom-[6vh] text-center"
+        className="absolute inset-x-0 bottom-[6vh] flex flex-col items-center gap-3 text-center"
         style={{ opacity: 0 }}
       >
         <span className="bp-annotation">click a parked car to open its section</span>
+        {/* The overlay container is pointer-events-none; re-enable for the button */}
+        <button
+          className="bp-btn px-4 py-2 pointer-events-auto"
+          onClick={onRestart}
+        >
+          [ ↑ ] back to the start
+        </button>
       </div>
     </div>
   );

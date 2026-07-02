@@ -21,7 +21,7 @@ const TIMELINE_HEIGHT = '1800vh';
 
 export default function HomePage() {
   const [mode, setMode] = useState<'loading' | 'full' | 'fallback'>('loading');
-  const { pRef, lock, unlock } = useScrollProgress();
+  const { pRef, scrollToProgress, lock, unlock } = useScrollProgress();
   const activeSection = useSiteStore(s => s.activeSection);
 
   // Capability detection — decide once on mount (client only, avoids hydration mismatch).
@@ -57,7 +57,7 @@ export default function HomePage() {
       </div>
 
       {/* Hero / About overlays, scroll-linked */}
-      <ScrollSections pRef={pRef} />
+      <ScrollSections pRef={pRef} onRestart={() => scrollToProgress(0)} />
 
       {/* The only in-flow element: gives the page its scrollable timeline */}
       <div style={{ height: TIMELINE_HEIGHT }} aria-hidden />

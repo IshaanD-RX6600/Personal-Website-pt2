@@ -13,7 +13,7 @@ page.on('console', m => { if (m.type() === 'error') console.log('[console.error]
 page.on('pageerror', e => console.log('[pageerror]', e.message));
 await page.goto('http://localhost:3000', { waitUntil: 'domcontentloaded' });
 await page.waitForSelector('canvas', { timeout: 60000 });
-await page.waitForTimeout(7000); // model load + fade-in
+await page.waitForTimeout(16000); // main scene + lazy street/cars (~90MB dev-served)
 
 for (const p of P) {
   await page.evaluate((prog) => {
