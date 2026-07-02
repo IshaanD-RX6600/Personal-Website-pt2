@@ -218,14 +218,15 @@ export default function CarModel({ pRef }: { pRef: React.MutableRefObject<number
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-      {/* Canvas fades/scales in over 0.6s once the models have streamed in */}
+      {/* Canvas fades in over 0.6s once the models have streamed in.
+          Opacity only — a scale-up would leave page-background bands
+          around the canvas edges while it animates. */}
       <div
         style={{
           width: '100%',
           height: '100%',
           opacity: ready ? 1 : 0,
-          transform: ready ? 'scale(1)' : 'scale(0.97)',
-          transition: 'opacity 0.6s ease, transform 0.6s ease',
+          transition: 'opacity 0.6s ease',
         }}
       >
         <Canvas

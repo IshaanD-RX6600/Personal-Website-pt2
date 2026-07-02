@@ -294,17 +294,26 @@ const GRASS_GLB = '/patch_of_grass.glb';
 const TREES_GLB = '/trees_low_poly.glb';
 const LAWN_Y = FLOOR_Y - 0.06;
 
-// Field zones to blanket with tufts: [x0, x1, z0, z1]. Everything beside and
-// behind the garage plus the strips flanking the road — never the door
-// corridor, the garage footprint, or the road plot itself.
-const GRASS_ZONES: [number, number, number, number][] = [
-  [-36,  -7, -20, 5.5],   // left of the garage
-  [  7,  36, -20, 5.5],   // right of the garage
-  [ -5,   5, -20, -10],   // behind the garage
-  [-39, -27,   7,  48],   // left of the road
-  [ 27,  39,   7,  48],   // right of the road
+// Field zones to blanket with tufts: [x0, x1, z0, z1, step, sBase, sVar].
+// step = grid spacing, sBase/sVar = tuft footprint scale range. Big cheap
+// tufts fill the open fields; SMALL tufts (short blade reach → they pass the
+// garage-clearance test much closer in) fill the verges along the walls and
+// the road shoulders so no bald strips remain. Never the door corridor, the
+// garage footprint, or the road plot itself.
+const GRASS_ZONES: [number, number, number, number, number, number, number][] = [
+  // open fields
+  [-40,  -7, -20, 5.5, 4.4, 0.036, 0.0010],  // left of the garage
+  [  7,  40, -20, 5.5, 4.4, 0.036, 0.0010],  // right of the garage
+  [ -5,   5, -20, -10, 4.4, 0.036, 0.0010],  // behind the garage
+  [-42, -26,   7,  52, 4.4, 0.036, 0.0010],  // left of the road
+  [ 26,  42,   7,  52, 4.4, 0.036, 0.0010],  // right of the road
+  // verge fills — small tufts hugging the garage walls and road shoulders
+  [-9.5,  -6, -10, 5.5, 1.8, 0.016, 0.0006], // left wall verge
+  [   6,  9.5, -10, 5.5, 1.8, 0.016, 0.0006], // right wall verge
+  [-9.5,  9.5, -12, -9, 1.8, 0.016, 0.0006], // back verge
+  [-28, -25.5,   7, 52, 1.8, 0.016, 0.0006], // left road shoulder
+  [25.5,   28,   7, 52, 1.8, 0.016, 0.0006], // right road shoulder
 ];
-const GRASS_STEP = 4.4;   // tuft grid spacing (tufts are ~6.5 wide → overlap)
 // [kind, x, z, scale, yaw]
 const TREE_SPOTS: ['tree4' | 'tree6', number, number, number, number][] = [
   ['tree4', -8.5,  5.5, 0.0032, 0.4], ['tree6',  9.0,  5.0, 0.0040, 2.1],
@@ -323,7 +332,7 @@ function GrassField() {
     scene.updateMatrixWorld(true);
     const geos: THREE.BufferGeometry[] = [];
     let mat: THREE.MeshStandardMaterial | null = null;
-    // Optimization + shape: keep every 4th blade (~9k source meshes is far
+    // Optimization + shape: keep every 5th blade (~9k source meshes is far
     // denser than needed) and only blades inside an 85-unit disc of the plot
     // center — the merged tuft comes out round, so overlapping instances
     // tile into a continuous field with no straight seams.
@@ -335,7 +344,7 @@ function GrassField() {
       const m = mesh.material as THREE.MeshStandardMaterial;
       if (m.name !== 'grass') return; // skip the Soil base plate
       mat = m;
-      if (i++ % 4 !== 0) return;
+      if (i++ % 5 !== 0) return;
       const e = mesh.matrixWorld.elements;
       if (e[12] * e[12] + e[14] * e[14] > DISC_R2) return;
       geos.push(mesh.geometry.clone().applyMatrix4(mesh.matrixWorld));
@@ -362,21 +371,33 @@ function GrassField() {
   const field = useMemo(() => {
     if (!merged) return null;
     const spots: { x: number; z: number; ry: number; s: number; sy: number }[] = [];
+    // Garage shell (outer faces + margin): no tuft's blade disc may reach
+    // inside, or blades poke through the walls onto the showroom floor
+    const GX = 5.8, GZ0 = -8.5, GZ1 = 6.3;
     let n = 0;
-    for (const [x0, x1, z0, z1] of GRASS_ZONES) {
-      for (let x = x0; x <= x1; x += GRASS_STEP) {
-        for (let z = z0; z <= z1; z += GRASS_STEP) {
+    for (const [x0, x1, z0, z1, step, sBase, sVar] of GRASS_ZONES) {
+      const jit = step * 0.55; // jitter proportional to grid spacing
+      for (let x = x0; x <= x1; x += step) {
+        for (let z = z0; z <= z1; z += step) {
           // Deterministic jitter/variation from the index (no Math.random —
           // layout must be identical every mount)
           const h = (n * 2654435761) % 1000;
-          spots.push({
-            x: x + ((h % 30) / 30 - 0.5) * 2.4,
-            z: z + (((h >> 3) % 30) / 30 - 0.5) * 2.4,
-            ry: (h % 63) / 10,
-            s: 0.036 + (h % 11) * 0.001,   // footprint ~6.1..7.9 wide
-            sy: 0.011 + (h % 7) * 0.001,   // blades ~0.14..0.21 tall
-          });
           n++;
+          const sp = {
+            x: x + ((h % 30) / 30 - 0.5) * jit,
+            z: z + (((h >> 3) % 30) / 30 - 0.5) * jit,
+            ry: (h % 63) / 10,
+            s: sBase + (h % 11) * sVar,
+            sy: 0.011 + (h % 7) * 0.001,   // blades ~0.14..0.21 tall
+          };
+          // Blades live inside an 85-unit disc of the tuft origin — reject
+          // any placement whose disc overlaps the garage box
+          const reach = 85 * sp.s + 0.5;
+          if (
+            sp.x + reach > -GX && sp.x - reach < GX &&
+            sp.z + reach > GZ0 && sp.z - reach < GZ1
+          ) continue;
+          spots.push(sp);
         }
       }
     }

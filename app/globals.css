@@ -72,6 +72,14 @@
 
 html {
   scroll-behavior: smooth;
+  /* The 3D timeline is the whole page: kill sideways overflow (stray
+     overlay chips could otherwise summon a horizontal scrollbar) and hide
+     the scrollbar UI — wheel/touch/keys still scroll the timeline. */
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar {
+  display: none;
 }
 
 /* Prevent scrolling on specific pages */
